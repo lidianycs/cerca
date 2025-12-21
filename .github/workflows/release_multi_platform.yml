@@ -22,14 +22,14 @@ jobs:
             platform_name: linux
             javafx_url: https://download2.gluonhq.com/openjfx/17.0.8/openjfx-17.0.8_linux-x64_bin-sdk.zip
             script_ext: .sh
-            path_sep: :
+            path_sep: ":"
 
           # macOS Configuration (Intel x64 - runs on M1/M2 via Rosetta)
           - os: macos-13
             platform_name: mac
             javafx_url: https://download2.gluonhq.com/openjfx/17.0.8/openjfx-17.0.8_osx-x64_bin-sdk.zip
             script_ext: .sh
-            path_sep: :
+            path_sep: ":"
 
     runs-on: ${{ matrix.os }}
 
