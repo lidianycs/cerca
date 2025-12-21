@@ -40,13 +40,13 @@ jobs:
       # Install CERMINE into local Maven repo
       # -----------------------------
       - name: Install CERMINE dependency
-        run: |
-          mvn install:install-file \
-            -Dfile=lib/cermine-1.13.jar \
-            -DgroupId=pl.edu.icm \
-            -DartifactId=cermine \
-            -Dversion=1.13 \
-            -Dpackaging=jar
+        run: >
+          mvn install:install-file
+          -Dfile=lib/cermine-impl-1.13-jar-with-dependencies.jar
+          -DgroupId=pl.edu.icm
+          -DartifactId=cermine
+          -Dversion=1.13
+          -Dpackaging=jar
 
       # -----------------------------
       # Build with Maven
