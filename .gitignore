@@ -14,6 +14,9 @@ bin/
 out/
 build/
 target/
+.classpath
+.project
+.settings/
 
 # PDF files 
 *.pdf
