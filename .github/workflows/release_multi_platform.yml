@@ -64,6 +64,7 @@ jobs:
         run: |
           mkdir dist
           cp target/*.jar dist/
+          rm dist/original-*.jar
         shell: bash
 
       # -----------------------------
