@@ -1,11 +1,4 @@
 name: CERCA Desktop Release
-run: |
-          mvn install:install-file \
-            -Dfile=lib/cermine-1.13.jar \
-            -DgroupId=pl.edu.icm \
-            -DartifactId=cermine \
-            -Dversion=1.13 \
-            -Dpackaging=jar
 
 on:
   workflow_dispatch:
@@ -44,6 +37,18 @@ jobs:
         run: java -version
 
       # -----------------------------
+      # Install CERMINE into local Maven repo
+      # -----------------------------
+      - name: Install CERMINE dependency
+        run: |
+          mvn install:install-file \
+            -Dfile=lib/cermine-1.13.jar \
+            -DgroupId=pl.edu.icm \
+            -DartifactId=cermine \
+            -Dversion=1.13 \
+            -Dpackaging=jar
+
+      # -----------------------------
       # Build with Maven
       # -----------------------------
       - name: Build CERCA with Maven
@@ -59,7 +64,7 @@ jobs:
         shell: bash
 
       # -----------------------------
-      # Upload artifacts (per OS)
+      # Upload artifacts
       # -----------------------------
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
