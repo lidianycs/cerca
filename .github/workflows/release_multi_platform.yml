@@ -1,4 +1,11 @@
 name: CERCA Desktop Release
+run: |
+          mvn install:install-file \
+            -Dfile=lib/cermine-1.13.jar \
+            -DgroupId=pl.edu.icm \
+            -DartifactId=cermine \
+            -Dversion=1.13 \
+            -Dpackaging=jar
 
 on:
   workflow_dispatch:
