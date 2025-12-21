@@ -1,0 +1,19 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# IDE specific files
+*.ctxt
+.DS_Store
+.idea/
+.vscode/
+*.iml
+bin/
+out/
+build/
+target/
+
+# PDF files 
+*.pdf
