@@ -1,0 +1,122 @@
+name: Build All Platforms
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          # Windows Configuration
+          - os: windows-latest
+            platform_name: windows
+            javafx_url: https://download2.gluonhq.com/openjfx/17.0.8/openjfx-17.0.8_windows-x64_bin-sdk.zip
+            script_ext: .bat
+            path_sep: ;
+            
+          # Linux Configuration
+          - os: ubuntu-latest
+            platform_name: linux
+            javafx_url: https://download2.gluonhq.com/openjfx/17.0.8/openjfx-17.0.8_linux-x64_bin-sdk.zip
+            script_ext: .sh
+            path_sep: :
+
+          # macOS Configuration (Intel x64 - runs on M1/M2 via Rosetta)
+          - os: macos-13
+            platform_name: mac
+            javafx_url: https://download2.gluonhq.com/openjfx/17.0.8/openjfx-17.0.8_osx-x64_bin-sdk.zip
+            script_ext: .sh
+            path_sep: :
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # 1. Download the OS-specific JavaFX SDK
+    - name: Download JavaFX
+      shell: bash
+      run: |
+        curl -L -o javafx.zip ${{ matrix.javafx_url }}
+        unzip javafx.zip
+        mv openjfx-*-sdk javafx-sdk
+
+    # 2. Prepare Directories
+    - name: Create Build Dirs
+      shell: bash
+      run: |
+        mkdir out
+        mkdir dist
+        mkdir -p dist/lib
+
+    # 3. Compile (Using the OS-specific separator ; or :)
+    - name: Compile Java Sources
+      shell: bash
+      run: |
+        find src -name "*.java" > sources.txt
+        javac -d out -cp "lib/*${{ matrix.path_sep }}javafx-sdk/lib/*" @sources.txt
+
+    # 4. Create JAR
+    - name: Create JAR
+      shell: bash
+      run: jar cvfe dist/Cerca.jar Launcher -C out .
+
+    # 5. Create Custom JRE (Native to the current OS)
+    - name: Generate Runtime (JRE)
+      shell: bash
+      run: |
+        jlink --add-modules java.base,java.desktop,java.logging,jdk.unsupported,java.scripting,java.xml \
+        --output dist/jre --strip-debug --no-man-pages --no-header-files --compress=2
+
+    # 6. Bundle Assets (Copy Jars + Create Launcher Scripts)
+    - name: Bundle Assets
+      shell: bash
+      run: |
+        # Copy common libs
+        cp -r lib/* dist/lib/
+        # Copy platform-specific JavaFX libs (Replacing any duplicates)
+        cp -f javafx-sdk/lib/*.jar dist/lib/
+        
+    # 7. Create Launch Scripts (Conditionals for Windows vs Mac/Linux)
+    - name: Create Launcher Script (Windows)
+      if: matrix.platform_name == 'windows'
+      shell: cmd
+      run: |
+        echo @echo off > dist\Cerca.bat
+        echo start "" "jre\bin\javaw.exe" -cp "Cerca.jar;lib\*" Launcher >> dist\Cerca.bat
+
+    - name: Create Launcher Script (Linux/Mac)
+      if: matrix.platform_name != 'windows'
+      shell: bash
+      run: |
+        echo '#!/bin/bash' > dist/Cerca.sh
+        echo 'DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"' >> dist/Cerca.sh
+        echo '"$DIR/jre/bin/java" -cp "$DIR/Cerca.jar:$DIR/lib/*" Launcher' >> dist/Cerca.sh
+        chmod +x dist/Cerca.sh
+
+    # 8. Zip and Upload
+    - name: Zip Distribution
+      shell: bash
+      run: |
+        cd dist
+        if [ "${{ matrix.platform_name }}" == "windows" ]; then
+          7z a ../Cerca_${{ matrix.platform_name }}.zip *
+        else
+          zip -r ../Cerca_${{ matrix.platform_name }}.zip *
+        fi
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: Cerca_${{ matrix.platform_name }}.zip
