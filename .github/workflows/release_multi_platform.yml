@@ -42,7 +42,7 @@ jobs:
       - name: Install CERMINE dependency
         shell: bash
         run: |
-          CERMINE_JAR="$(pwd)/lib/cermine-1.13.jar"
+          CERMINE_JAR="$(pwd)/lib/cermine.jar"
           echo "Installing CERMINE from $CERMINE_JAR"
           mvn install:install-file \
             -Dfile="$CERMINE_JAR" \
