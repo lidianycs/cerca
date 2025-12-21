@@ -1,4 +1,4 @@
-name: CERCA Desktop Release
+name: CERCA Desktop Release alpha
 
 on:
   workflow_dispatch:
