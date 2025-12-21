@@ -42,7 +42,7 @@ jobs:
       - name: Install CERMINE dependency
         run: >
           mvn install:install-file
-          -Dfile=lib/cermine-impl-1.13-jar-with-dependencies.jar
+          -Dfile=lib/cermine.jar
           -DgroupId=pl.edu.icm
           -DartifactId=cermine
           -Dversion=1.13
