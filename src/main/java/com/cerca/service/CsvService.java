@@ -7,6 +7,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Export the data to a CSV file locally stored.
+ *
+ * @author Lidiany Cerqueira
+ */
 public class CsvService {
 
     public void exportToCsv(List<ReferenceItem> data, File file) throws IOException {

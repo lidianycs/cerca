@@ -11,6 +11,18 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Extracts bibliographic references from PDF documents using the CERMINE library.
+ *
+ * This service is responsible for parsing PDF files locally and producing structured
+ * reference metadata.
+ * 
+ * The extracted references are later verified against authoritative metadata sources
+ * by other components in the CERCA pipeline.
+ * 
+ * Privacy note: PDF files are processed locally.
+ * @author Lidiany Cerqueira
+ */
 public class CermineService {
 
     public List<ReferenceItem> extractReferences(File pdfFile) throws Exception {

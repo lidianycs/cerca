@@ -39,6 +39,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+
+/**
+ * JavaFX controller for the main CERCA user interface.
+ * @author Lidiany Cerqueira
+ */
 public class MainView {
 
 	private final BorderPane layout;

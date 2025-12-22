@@ -10,6 +10,18 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 
+/**
+ * Represents a reference entry displayed in the CERCA user interface.
+ *
+ * <p>
+ * This class acts as a UI-facing representation of a bibliographic reference
+ * and its verification outcome. It wraps reference metadata and verification
+ * results using JavaFX properties so that changes can be observed and reflected
+ * automatically in the user interface.
+ * </p>
+ *
+ * @author Lidiany Cerqueira
+ */
 public class ReferenceItem {
 	private final IntegerProperty id;
 	private final IntegerProperty matchScore;
@@ -20,8 +32,6 @@ public class ReferenceItem {
 	private final StringProperty dbTitle;
 	private final StringProperty dbAuthors; 
 	private final StringProperty doi;
-	// Hidden data for logic
-	// private String detectedDoi;
 	private String rawText;
 	private final BooleanProperty verified;
 

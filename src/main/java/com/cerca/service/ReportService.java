@@ -8,6 +8,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+/**
+ * Export the data to a TXT diagnosis file locally stored.
+ *
+ * @author Lidiany Cerqueira
+ */
 public class ReportService {
 
     public void exportReport(List<ReferenceItem> items, File file) throws IOException {

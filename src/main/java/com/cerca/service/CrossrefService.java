@@ -14,6 +14,15 @@ import com.google.gson.JsonParser;
 import javafx.scene.paint.Color;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
+/**
+ * Queries the Crossref API to retrieve authoritative bibliographic metadata.
+ *
+ * This service performs metadata-only lookups based on reference fields such as
+ * title, authors, and DOI. 
+ * 
+ * The results returned by this service are used for comparison and verification.
+ * @author Lidiany Cerqueira
+ */
 public class CrossrefService {
 	
 	private final LogService logger;

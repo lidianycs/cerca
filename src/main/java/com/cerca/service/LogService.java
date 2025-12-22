@@ -9,6 +9,11 @@ import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Save the logs of operations for audit purposes.
+ *
+ * @author Lidiany Cerqueira
+ */
 public class LogService {
 
     private static final Path LOG_FILE = Paths.get("cerca_audit.log");

@@ -16,6 +16,15 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+/**
+ * Queries the Zenodo API to retrieve authoritative bibliographic metadata.
+ *
+ * This service performs metadata-only lookups based on reference fields such as
+ * title, authors, and DOI. 
+ * 
+ * The results returned by this service are used for comparison and verification.
+ * @author Lidiany Cerqueira
+ */
 public class ZenodoService {
 
     private final HttpClient client;

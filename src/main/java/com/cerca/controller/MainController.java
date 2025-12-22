@@ -25,6 +25,14 @@ import javafx.scene.input.TransferMode;
 import javafx.stage.FileChooser;
 import pl.edu.icm.cermine.exception.AnalysisException;
 
+/**
+ * Controller for the main CERCA user interface.
+ *
+ * This controller manages user interactions such as loading PDF files,
+ * initiating reference verification, and displaying results.
+ * @author Lidiany Cerqueira
+ * 
+ */
 public class MainController {
 
 	private final MainView view;

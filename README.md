@@ -28,13 +28,15 @@
 
 ### Windows
 1. Download **`Cerca_windows.zip`**.
-2. Unzip it.
-3. Double-click **`cerca-project-1.0-SNAPSHOT.jar`**.
+2. Unzip the file.
+3. Double-click Cerca-1.0-alpha.jar.
+
+If Windows shows a security warning, choose More info → Run anyway.
 
 ### macOS
 1. Download **`Cerca_mac.zip`**.
 2. Unzip it.
-3. Click **`cerca-project-1.0-SNAPSHOT.jar`** and choose **Open**.
+3. Right-click **`Cerca-1.0-alpha.jar`** and select **Open**.
    * *Note: Since this is an unverified alpha app, you may need to go to System Settings > Privacy & Security to allow it to run.*
 
 ### Linux
@@ -42,7 +44,7 @@
 2. Unzip it.
 3. Open a terminal in that folder and run:
    ```bash
-   ./Cerca.sh
+   		java -jar Cerca-1.0-alpha.jar   
    
   ---
 
