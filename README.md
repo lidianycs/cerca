@@ -46,7 +46,19 @@ If Windows shows a security warning, choose More info → Run anyway.
    ```bash
    		java -jar Cerca-1.0-alpha.jar   
    
-  ---
+  
+---
+## 🛠 Requirements
+
+CERCA is a Java desktop application built with JavaFX.
+
+To run CERCA, you need:
+
+- **Java 17 or newer**
+- A **Java Runtime Environment that includes JavaFX**  
+- I recommend installing [**Azul Zulu JRE with JavaFX**](https://www.azul.com/downloads/?version=java-25-lts&package=jre-fx#zulu)
+
+---
 
 ## 🔒Privacy & Local Processing
 
