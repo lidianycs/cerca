@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.WritableIntegerValue;
 import javafx.scene.paint.Color;
 
 /**
@@ -43,9 +44,8 @@ public class ReferenceItem {
 		this.pdfTitle = new SimpleStringProperty(pdfTitle);
 		this.dbTitle = new SimpleStringProperty("");
 		this.matchScore = new SimpleIntegerProperty(0);
-		this.rawText = rawText;
-		// this.detectedDoi = doi;
-		this.dbAuthors = new SimpleStringProperty(""); // <--- Initialize empty
+		this.rawText = rawText;		
+		this.dbAuthors = new SimpleStringProperty(""); 
 		this.doi = new SimpleStringProperty(doi);
 		this.verified = new SimpleBooleanProperty(false);
 		
@@ -105,7 +105,7 @@ public class ReferenceItem {
 		this.matchScore.set(score);
 	}
 
-	// Standard Getters
+
 	public String getPdfTitle() {
 		return pdfTitle.get();
 	}
@@ -113,7 +113,6 @@ public class ReferenceItem {
 	public String getRawText() {
 		return rawText;
 	}
-
 	
 
 	public StringProperty dBAuthorsProperty() {

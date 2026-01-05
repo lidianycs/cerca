@@ -54,7 +54,7 @@ public class CrossrefService {
 
 				String title = cleanText(item.getPdfTitle());
 		        String author = cleanText(item.getAuthors());
-				logger.log("API_REQ", String.format("ID %d | Querying: Title='%s' Author='%s'", 
+				logger.log("API_REQ", String.format("Crossref ID %d | Querying: Title='%s' Author='%s'", 
 		                item.getId(), title, author));
 				String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
 				jsonResponse = callApi("https://api.crossref.org/works?query.bibliographic=" + encoded + "&rows=1");
@@ -72,7 +72,7 @@ public class CrossrefService {
 
 		} catch (Exception e) {
 			markNotFound(item);
-			logger.log("ERROR", "API Request failed for ID " + item.getId() + ": " + e.getMessage());
+			logger.log("ERROR", "Crossref API Request failed for ID " + item.getId() + ": " + e.getMessage());
 			return false;
 		}
 	}

@@ -12,6 +12,7 @@ import com.cerca.service.CermineService;
 import com.cerca.service.CrossrefService;
 import com.cerca.service.CsvService;
 import com.cerca.service.LogService;
+import com.cerca.service.OpenAlexService;
 import com.cerca.service.ReportService;
 import com.cerca.service.ZenodoService;
 import com.cerca.view.MainView;
@@ -44,6 +45,8 @@ public class MainController {
 	private final LogService logService;
 	private final ZenodoService zenodoService;
 
+	private final OpenAlexService openAlexService;
+
 	public MainController(MainView view) {
 		this.view = view;
 		this.data = FXCollections.observableArrayList();
@@ -53,6 +56,7 @@ public class MainController {
 		this.logService = new LogService();
 		this.crossrefService = new CrossrefService(logService);
 		this.zenodoService = new ZenodoService(logService);
+		this.openAlexService = new OpenAlexService(logService);
 		view.getTable().setItems(data);
 
 		setupDragAndDrop();
@@ -111,7 +115,7 @@ public class MainController {
 			try {
 				return cermineService.extractReferences(file);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				
 				throw new CompletionException(e);
 			}
 		}).thenAccept(items -> {
@@ -183,8 +187,8 @@ public class MainController {
 		view.getAboutItem().setOnAction(e -> showAboutDialog());
 		view.getLicenseItem().setOnAction(e -> showLicenseDialog());
 
-		view.getSponsorItem().setOnAction(e -> openUrl("https://github.com/sponsors/lidianycs"));
-		view.getContributeItem().setOnAction(e -> openUrl("https://github.com/sponsors/lidianycs"));
+		view.getSponsorItem().setOnAction(e -> openUrl("https://github.com/lidianycs/cerca"));
+		view.getContributeItem().setOnAction(e -> openUrl("https://github.com/lidianycs/cerca"));
 	}
 
 	private void showAboutDialog() {
@@ -194,7 +198,7 @@ public class MainController {
 		alert.setContentText(
 
 				"\n ✦ CERCA is an experimental tool intended to help verify bibliographic "
-						+ "references against the Crossref database but is not 100% accurate. "
+						+ "references against the online databases but is not 100% accurate. "
 						+ "It does not replace manual verification. Always check the original source.\n\n"
 						+ "✦ CERCA is designed with privacy in mind. All file parsing and reference extraction are performed locally. "
 						+ "Your manuscript is never uploaded, stored, or shared."
@@ -265,9 +269,18 @@ public class MainController {
 				});
 
 				crossrefService.verifyItem(item);
-				if (item.getMatchScore() < 75) {
-					zenodoService.verify(item);
+				
+				// Define what score counts as a "Pass" (e.g., 75%)
+				int PASS_THRESHOLD = 75;
 
+				// Try OpenAlex 
+				if (item.getMatchScore() < PASS_THRESHOLD) {
+				    openAlexService.verify(item);
+				}
+
+				
+				if (item.getMatchScore() < PASS_THRESHOLD) {
+				    zenodoService.verify(item);
 				}
 
 				Platform.runLater(() -> {
@@ -280,7 +293,7 @@ public class MainController {
 				});
 
 				try {
-					Thread.sleep(100);
+					Thread.sleep(150);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
