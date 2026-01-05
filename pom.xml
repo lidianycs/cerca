@@ -6,7 +6,7 @@
 
 	<groupId>com.cerca</groupId>
 	<artifactId>Cerca</artifactId>
-	<version>1.0-alpha</version>
+	<version>1.1.0-alpha</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,11 +18,12 @@
 
 
 	<dependencies>
+	
 		<dependency>
 			<groupId>pl.edu.icm</groupId>
 			<artifactId>cermine</artifactId>
 			<version>1.13</version>
-		</dependency>
+		</dependency> 
 
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
