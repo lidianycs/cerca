@@ -8,9 +8,10 @@
 
 ## Key Features
 
-- 📄 **Local PDF parsing** and reference extraction. 
-    * Drag-and-drop a PDF to automatically extract citations  
-- 🔍 **Reference verification** using Crossref and Zenodo metadata  
+- 📄 **Flexible Reference Input**:
+    * Drag-and-Drop: Parse references automatically from PDF files.	 
+    * Manual Entry Paste reference lists directly for quick checks.
+- 🔍 **Reference verification** using Crossref, OpenAlex and Zenodo metadata  
 - 📊 **Match scores** based on title, authors, and DOI similarity 
 - **Interactive Dashboard:** 
     * View real-time Pass/Fail statistics and verification rates.
@@ -77,6 +78,7 @@ CERCA is designed with researcher privacy in mind.
 2. Each reference is queried against:
    - **Crossref**
    - **Zenodo**
+   - **OpenAlex**
 3. Metadata fields (title, authors, DOI) are compared
 4. CERCA assigns:
    - A **match score**
@@ -164,9 +166,8 @@ If you use CERCA in your research, please cite it as research software.
 
 ## Author
 
-**Lidiany Cerqueira, PhD**    
+[**Lidiany Cerqueira, PhD**](https://lidianycs.site/)      
 Computer Science Researcher  
-[lidianycs.site](https://lidianycs.site/)
 
 ---
 
