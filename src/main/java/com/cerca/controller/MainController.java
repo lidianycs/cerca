@@ -15,6 +15,7 @@ import com.cerca.service.LogService;
 import com.cerca.service.OpenAlexService;
 import com.cerca.service.ReportService;
 import com.cerca.service.ZenodoService;
+import com.cerca.utils.ReferenceParser;
 import com.cerca.view.MainView;
 
 import javafx.application.Platform;
@@ -80,8 +81,8 @@ public class MainController {
 			event.setDropCompleted(true);
 			event.consume();
 		});
-	}
-
+	}	
+	
 	private void openUrl(String url) {
 		try {
 			java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
@@ -180,6 +181,14 @@ public class MainController {
 	}
 
 	private void setupButtons() {
+		view.getPasteButton().setOnAction(e -> {
+		    view.showManualEntryDialog(pastedText -> {
+		        if (pastedText != null && !pastedText.isEmpty()) {
+		        	loadManualReferences(pastedText);
+		        }
+		    });
+		});
+		
 		view.getVerifyButton().setOnAction(e -> verifyAll());
 
 		view.getSaveButton().setOnAction(e -> exportData());
@@ -358,6 +367,41 @@ public class MainController {
 				ex.printStackTrace();
 			}
 		}
+	}
+	
+		
+	private void loadManualReferences(String text) {
+	   
+	    this.data.clear(); 
+	    this.view.resetDashboard();
+	    
+	    
+	    String[] lines = text.split("\\r?\\n");
+	    
+	    int idCounter = 1;
+	    for (String line : lines) {
+	        // Skip empty lines
+	        if (line.trim().length() < 5) continue;
+
+	        
+	        ReferenceParser.ParsedData parsedData = ReferenceParser.parse(line);
+
+	        
+	        ReferenceItem item = new ReferenceItem(
+	            idCounter++,       
+	            "WAITING",          
+	            parsedData.authors,       
+	            parsedData.title,         
+	            line,               
+	            ""                  
+	        );
+	        
+	        data.add(item);
+	    }
+	    
+	    
+	    this.view.getFileTitleLabel().setText("Source: Manual Entry");
+	    this.view.getStatusLabel().setText("Loaded " + data.size() + " references. Ready to verify.");
 	}
 
 }

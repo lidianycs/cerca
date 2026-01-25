@@ -2,6 +2,8 @@ package com.cerca.view;
 
 import java.awt.Desktop;
 import java.net.URI;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.cerca.model.ReferenceItem;
 
@@ -11,7 +13,10 @@ import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -25,6 +30,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -39,9 +45,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
-
 /**
  * JavaFX controller for the main CERCA user interface.
+ * 
  * @author Lidiany Cerqueira
  */
 public class MainView {
@@ -61,9 +67,14 @@ public class MainView {
 	private Label passedBadge;
 	private Label failedBadge;
 	private Label rateBadge;
+	private final Button pasteButton;
 
 	public Button getSaveButton() {
 		return saveButton;
+	}
+
+	public Button getPasteButton() {
+		return pasteButton;
 	}
 
 	private final Label fileTitleLabel;
@@ -88,7 +99,6 @@ public class MainView {
 		layout = new BorderPane();
 		resultsDashboard = createResultsDashboard();
 
-
 		VBox topContainer = new VBox(10);
 		topContainer.setPadding(new Insets(15));
 		topContainer.setAlignment(Pos.CENTER);
@@ -99,31 +109,31 @@ public class MainView {
 		Label instructions = new Label("Drag PDF Here");
 		instructions.setFont(Font.font("Segoe UI", FontWeight.BOLD, 16));
 
-		topContainer.getChildren().addAll(icon, instructions);
+		pasteButton = new Button("📝 Paste References Manually");
+		setupPasteButtonStyle();	
+		
+
+		topContainer.getChildren().addAll(icon, instructions, pasteButton);
 
 		progressBar = new ProgressBar();
 		progressBar.setMaxWidth(Double.MAX_VALUE);
 		progressBar.setVisible(false);
 
-	
 		fileTitleLabel = new Label("");
 		fileTitleLabel.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
 		fileTitleLabel.setTextFill(Color.DARKSLATEGRAY);
 		fileTitleLabel.setPadding(new Insets(5, 0, 5, 0));
 
-		
 		VBox topWrapper = new VBox(5, topContainer, fileTitleLabel, resultsDashboard, progressBar);
 		topWrapper.setPadding(new Insets(8));
 
-		
 		table = new TableView<>();
 		createColumns();
 		table.setPlaceholder(new Label("Drag & Drop a PDF to begin"));
 
-		
 		statusLabel = new Label("Ready");
 		statusLabel.setFont(Font.font("Segoe UI", 14));
-		statusLabel.setPadding(new Insets(0, 0, 0, 5)); 
+		statusLabel.setPadding(new Insets(0, 0, 0, 5));
 
 		verifyButton = new Button("🔍 Verify");
 		verifyButton.setStyle("-fx-font-size: 14px; -fx-padding: 8 20 8 20; -fx-base: #e6f7ff;");
@@ -133,12 +143,11 @@ public class MainView {
 		saveButton.setVisible(false);
 		saveButton.setManaged(false);
 
-		
 		Region spacer = new Region();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 
 		HBox bottomBar = new HBox(10, statusLabel, spacer, saveButton, verifyButton);
-		bottomBar.setAlignment(Pos.CENTER_LEFT); 
+		bottomBar.setAlignment(Pos.CENTER_LEFT);
 		bottomBar.setPadding(new Insets(10));
 
 		MenuBar menuBar = new MenuBar();
@@ -149,8 +158,7 @@ public class MainView {
 		contributeItem = new MenuItem("💻 Contribute");
 		licenseItem = new MenuItem("🗐 License");
 
-		helpMenu.getItems().addAll(sponsorItem, contributeItem, licenseItem, new SeparatorMenuItem(), 
-				aboutItem);
+		helpMenu.getItems().addAll(sponsorItem, contributeItem, licenseItem, new SeparatorMenuItem(), aboutItem);
 
 		menuBar.getMenus().add(helpMenu);
 
@@ -162,10 +170,50 @@ public class MainView {
 		layout.setBottom(bottomBar);
 
 		table.getSelectionModel().setCellSelectionEnabled(true);
-		table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE); 
+		table.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-		
 		installCopyHandler(table);
+	}
+
+	/**
+	 * Setup Paste Button styling
+	 */
+	private void setupPasteButtonStyle() {
+		
+		pasteButton.setStyle(
+				"-fx-background-color: #6c757d;" +         
+			    "-fx-text-fill: white;" +                   
+			    "-fx-font-size: 14px;" +                    
+			    "-fx-font-weight: bold;" +                 
+			    "-fx-padding: 12 25;" +                     
+			    "-fx-background-radius: 30;" +              
+			    "-fx-cursor: hand;" +                       
+			    "-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);"  
+			);
+
+			
+			pasteButton.setOnMouseEntered(e -> pasteButton.setStyle(
+				"-fx-background-color: #5a6268;" +          
+			    "-fx-text-fill: white;" +
+			    "-fx-font-size: 14px;" +
+			    "-fx-font-weight: bold;" +
+			    "-fx-padding: 12 25;" +
+			    "-fx-background-radius: 30;" +
+			    "-fx-cursor: hand;" +
+			    "-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 6, 0, 0, 2);"
+			));
+
+			
+			pasteButton.setOnMouseExited(e -> pasteButton.setStyle(
+				"-fx-background-color: #6c757d;" +
+			    "-fx-text-fill: white;" +
+			    "-fx-font-size: 14px;" +
+			    "-fx-font-weight: bold;" +
+			    "-fx-padding: 12 25;" +
+			    "-fx-background-radius: 30;" +
+			    "-fx-cursor: hand;" +
+			    "-fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);"
+			));
 	}
 
 	public MenuItem getLicenseItem() {
@@ -178,11 +226,10 @@ public class MainView {
 		authorCol.setCellValueFactory(cell -> cell.getValue().authorsProperty());
 		authorCol.setPrefWidth(200);
 
-		
 		TableColumn<ReferenceItem, String> crAuthorCol = new TableColumn<>("DB Authors");
 		crAuthorCol.setCellValueFactory(cell -> cell.getValue().dBAuthorsProperty());
 		crAuthorCol.setPrefWidth(200);
-		crAuthorCol.setStyle("-fx-text-fill: #0052cc;"); // Blue text to indicate "Cloud Data"
+		crAuthorCol.setStyle("-fx-text-fill: #0052cc;"); 
 
 		TableColumn<ReferenceItem, Integer> idCol = new TableColumn<>("#");
 		idCol.setCellValueFactory(cell -> cell.getValue().idProperty().asObject());
@@ -216,13 +263,10 @@ public class MainView {
 		crTitleCol.setPrefWidth(400);
 		crTitleCol.setStyle("-fx-text-fill: #0052cc;"); // Blue text for online data
 
-		
 		TableColumn<ReferenceItem, Number> matchCol = new TableColumn<>("Match Score");
 
-		
 		matchCol.setCellValueFactory(cell -> cell.getValue().matchScoreProperty());
 
-		
 		matchCol.setCellFactory(column -> new TableCell<ReferenceItem, Number>() {
 			@Override
 			protected void updateItem(Number item, boolean empty) {
@@ -233,7 +277,6 @@ public class MainView {
 				} else {
 					setText(item.intValue() + "%");
 
-					
 					if (item.intValue() == 100) {
 						setTextFill(javafx.scene.paint.Color.GREEN);
 					} else if (item.intValue() < 50) {
@@ -250,7 +293,6 @@ public class MainView {
 		doiCol.setCellValueFactory(cell -> cell.getValue().doiProperty());
 		doiCol.setPrefWidth(120);
 
-		
 		doiCol.setCellFactory(col -> new TableCell<ReferenceItem, String>() {
 			private final Hyperlink link = new Hyperlink();
 
@@ -264,10 +306,9 @@ public class MainView {
 					link.setText(doiText);
 					link.setStyle("-fx-text-fill: blue; -fx-underline: true;");
 
-					
 					link.setOnAction(e -> {
 						try {
-							
+
 							String cleanDoi = doiText.trim();
 
 							String url = cleanDoi.startsWith("http") ? cleanDoi : "https://doi.org/" + cleanDoi;
@@ -283,7 +324,6 @@ public class MainView {
 			}
 		});
 
-		
 		ContextMenu contextMenu = new ContextMenu();
 		MenuItem searchGoogleItem = new MenuItem("🔍 Search on Google");
 		MenuItem searchScholarItem = new MenuItem("🎓 Search on Google Scholar");
@@ -297,7 +337,7 @@ public class MainView {
 			}
 		});
 
-		// Action: Search Scholar
+		
 		searchScholarItem.setOnAction(e -> {
 			ReferenceItem selected = table.getSelectionModel().getSelectedItem();
 			if (selected != null) {
@@ -308,7 +348,6 @@ public class MainView {
 
 		contextMenu.getItems().addAll(searchGoogleItem, searchScholarItem);
 
-		
 		table.setRowFactory(tv -> {
 			TableRow<ReferenceItem> row = new TableRow<>();
 			row.contextMenuProperty().bind(javafx.beans.binding.Bindings.when(row.emptyProperty())
@@ -319,12 +358,10 @@ public class MainView {
 		TableColumn<ReferenceItem, Boolean> verifiedCol = new TableColumn<>("✔");
 		verifiedCol.setCellValueFactory(cell -> cell.getValue().verifiedProperty());
 
-		
 		verifiedCol.setCellFactory(CheckBoxTableCell.forTableColumn(verifiedCol));
 		verifiedCol.setEditable(true); // Allow user to click it
 		verifiedCol.setPrefWidth(50);
 
-		
 		table.getColumns().addAll(idCol, verifiedCol, statusCol, matchCol, authorCol, crAuthorCol, titleCol, crTitleCol,
 				doiCol);
 		table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -334,14 +371,13 @@ public class MainView {
 
 	private void openUrl(String url) {
 		try {
-			
+
 			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
 
-				
 				Desktop.getDesktop().browse(new URI(url));
 
 			} else {
-				
+
 				System.err.println("Desktop browse not supported on this system.");
 				showAlert("Browser Error", "Could not open browser. Please visit:\n" + url);
 			}
@@ -351,7 +387,6 @@ public class MainView {
 		}
 	}
 
-	
 	private void showAlert(String title, String content) {
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.setTitle(title);
@@ -362,7 +397,7 @@ public class MainView {
 
 	private void installCopyHandler(TableView<ReferenceItem> table) {
 		table.setOnKeyPressed(event -> {
-			
+
 			if (event.isShortcutDown() && event.getCode() == KeyCode.C) {
 
 				StringBuilder clipboardString = new StringBuilder();
@@ -371,34 +406,29 @@ public class MainView {
 				if (selectedCells.isEmpty())
 					return;
 
-				
 				int prevRow = selectedCells.get(0).getRow();
 
 				for (TablePosition pos : selectedCells) {
 					int row = pos.getRow();
 
-					
 					if (row != prevRow) {
 						clipboardString.append('\n');
 						prevRow = row;
 					} else if (clipboardString.length() > 0) {
-						
+
 						clipboardString.append('\t');
 					}
 
-					
 					Object cellData = pos.getTableColumn().getCellData(row);
 
-					
 					clipboardString.append(cellData == null ? "" : cellData.toString());
 				}
 
-				
 				final ClipboardContent content = new ClipboardContent();
 				content.putString(clipboardString.toString());
 				Clipboard.getSystemClipboard().setContent(content);
 
-				event.consume(); 
+				event.consume();
 			}
 		});
 	}
@@ -406,28 +436,25 @@ public class MainView {
 	public VBox createResultsDashboard() {
 		resultsDashboard = new VBox(10);
 		resultsDashboard.setPadding(new Insets(0, 0, 15, 0));
-		resultsDashboard.setVisible(false); // Hidden by default
-		resultsDashboard.setManaged(false); // Doesn't take space when hidden
+		resultsDashboard.setVisible(false);
+		resultsDashboard.setManaged(false);
 
-		
 		Label successAlert = new Label("Search complete!");
 		successAlert.setMaxWidth(Double.MAX_VALUE);
 		successAlert.setStyle("-fx-background-color: #e6fffa; -fx-text-fill: #047857;"
 				+ "-fx-padding: 10 15; -fx-font-weight: bold; -fx-background-radius: 4;"
 				+ "-fx-border-color: #10b981; -fx-border-width: 0 0 0 5;");
 
-		
 		Label resultsHeader = new Label("Results");
 		resultsHeader.setFont(Font.font("Segoe UI", FontWeight.BOLD, 18));
 
-		
 		HBox statsRow = new HBox(15);
 		statsRow.setAlignment(Pos.CENTER_LEFT);
 
-		totalBadge = createBadge("References: -", "#f3f4f6", "#1f2937"); // Gray
-		passedBadge = createBadge("Passed: -", "#d1fae5", "#065f46"); // Green
-		failedBadge = createBadge("Failed: -", "#fee2e2", "#991b1b"); // Red
-		rateBadge = createBadge("Pass Rate: -", "#f3f4f6", "#1f2937"); // Gray
+		totalBadge = createBadge("References: -", "#f3f4f6", "#1f2937"); 
+		passedBadge = createBadge("Passed: -", "#d1fae5", "#065f46"); 
+		failedBadge = createBadge("Failed: -", "#fee2e2", "#991b1b"); 
+		rateBadge = createBadge("Pass Rate: -", "#f3f4f6", "#1f2937"); 
 
 		statsRow.getChildren().addAll(totalBadge, passedBadge, failedBadge, rateBadge);
 		resultsDashboard.getChildren().addAll(successAlert, resultsHeader, statsRow);
@@ -435,9 +462,9 @@ public class MainView {
 		return resultsDashboard;
 	}
 
-	/** 
-	 * 3. Helper for styling badges
-	 * */
+	/**
+	 * Helper for styling badges
+	 */
 	private Label createBadge(String text, String bgColor, String textColor) {
 		Label badge = new Label(text);
 		badge.setStyle(
@@ -446,7 +473,9 @@ public class MainView {
 		return badge;
 	}
 
-	/** PUBLIC METHOD: The Controller calls this to show results**/
+	/**
+	 * The Controller calls this to show results
+	 **/
 	public void updateTestResults(int total, int passed, int failed) {
 		double rate = (total == 0) ? 0.0 : ((double) passed / total) * 100;
 
@@ -455,12 +484,13 @@ public class MainView {
 		failedBadge.setText("Failed: " + failed);
 		rateBadge.setText(String.format("Pass Rate: %.1f%%", rate));
 
-		
 		resultsDashboard.setVisible(true);
 		resultsDashboard.setManaged(true);
 	}
 
-	/** Hide results dashboard when a new file is uploaded before verification **/
+	/**
+	 * Hide results dashboard when a new file is uploaded before verification
+	 **/
 	public void resetDashboard() {
 		resultsDashboard.setVisible(false);
 		resultsDashboard.setManaged(false);
@@ -488,6 +518,48 @@ public class MainView {
 
 	public Pane getDragTarget() {
 		return (Pane) ((VBox) layout.getTop()).getChildren().get(0);
+	}
+
+	/**
+	 * Opens a dialog for manual reference entry.
+	 * 
+	 * @param onConfirm Callback to process the pasted text.
+	 */
+	public void showManualEntryDialog(Consumer<String> onConfirm) {
+		Dialog<String> dialog = new Dialog<>();
+		dialog.setTitle("Manual Entry");
+		dialog.setHeaderText("Paste your reference list below:");
+
+		ButtonType processButtonType = new ButtonType("Process", ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(processButtonType, ButtonType.CANCEL);
+
+		TextArea textArea = new TextArea();
+		textArea.setPromptText("Paste one reference per line.");
+		textArea.setWrapText(true);
+		textArea.setPrefHeight(300);
+		textArea.setPrefWidth(500);
+
+		VBox content = new VBox(10, textArea);
+		content.setPadding(new Insets(10));
+
+		dialog.getDialogPane().setContent(content);
+
+		
+		dialog.setResultConverter(dialogButton -> {
+			if (dialogButton == processButtonType) {
+				resetDashboard();
+				saveButton.setVisible(false);
+				return textArea.getText();
+			}
+			return null;
+		});
+
+		Optional<String> result = dialog.showAndWait();
+		result.ifPresent(text -> {
+			if (!text.trim().isEmpty()) {
+				onConfirm.accept(text);
+			}
+		});
 	}
 
 }
