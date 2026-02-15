@@ -19,11 +19,10 @@ import java.time.Duration;
 public class OpenAlexService {
 
     private final HttpClient client;
-    private final LogService logger;
-    
-    // REPLACE THIS with your actual email or a generic contact for the tool
-    // OpenAlex uses this to put you in the "Polite Pool" (fast lane)
-    private static final String EMAIL = "cerca.app@gmail.com"; 
+    private final LogService logger;   
+  
+      
+    private String email;
     
     private static final String API_URL = "https://api.openalex.org/works";
 
@@ -45,7 +44,7 @@ public class OpenAlexService {
             String encodedQuery = URLEncoder.encode(queryTerm, StandardCharsets.UTF_8);
             
             // mailto param puts you in the fast lane
-            String url = API_URL + "?search=" + encodedQuery + "&per-page=1&mailto=" + EMAIL;
+            String url = API_URL + "?search=" + encodedQuery + "&per-page=1&mailto=" + email;
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -53,8 +52,13 @@ public class OpenAlexService {
                     .build();
 
             // 2. Send Request
+            String title = cleanText(item.getPdfTitle());
+	        String author = cleanText(item.getAuthors());
+	        
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+            logger.log("API_REQ", String.format("Open Alex ID %d | Querying: Title='%s' Author='%s' Email='%s'", 
+	                item.getId(), title, author, email));
+            
             if (response.statusCode() == 200) {
                 return parseAndScore(response.body(), item);
             } else {
@@ -66,6 +70,17 @@ public class OpenAlexService {
         }
         return false;
     }
+    
+	/** Helper to safely format text for a URL**/
+	private String cleanText(String text) {
+	    if (text == null) return "";
+	    
+	    
+	    String clean = text.replaceAll("[^a-zA-Z0-9\\s]", "");
+	    
+	    
+	    return clean.trim().replace(" ", "+");
+	}
 
     private boolean parseAndScore(String json, ReferenceItem item) {
         try {
@@ -148,4 +163,18 @@ public class OpenAlexService {
         }
         return false;
     }
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
 }

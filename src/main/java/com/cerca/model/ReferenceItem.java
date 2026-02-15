@@ -158,5 +158,13 @@ public class ReferenceItem {
 	public void setVerified(boolean value) {
 		this.verified.set(value);
 	}
+	
+	
+	public void markNotFound() {
+		statusProperty().set("❌ NOT FOUND");
+		statusColorProperty().set(Color.RED);
+		matchScoreProperty().set(0);
+		setVerified(true);		
+	}
 
 }

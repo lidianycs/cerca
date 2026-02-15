@@ -27,6 +27,7 @@ public class CrossrefService {
 	
 	private final LogService logger;
 	private final HttpClient client;
+	private String email;
 
 	
 	
@@ -54,8 +55,8 @@ public class CrossrefService {
 
 				String title = cleanText(item.getPdfTitle());
 		        String author = cleanText(item.getAuthors());
-				logger.log("API_REQ", String.format("Crossref ID %d | Querying: Title='%s' Author='%s'", 
-		                item.getId(), title, author));
+				logger.log("API_REQ", String.format("Crossref ID %d | Querying: Title='%s' Author='%s' Email='%s'", 
+		                item.getId(), title, author, email));
 				String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
 				jsonResponse = callApi("https://api.crossref.org/works?query.bibliographic=" + encoded + "&rows=1");
 				
@@ -65,21 +66,22 @@ public class CrossrefService {
 				parseAndScore(jsonResponse, item);
 				return true;
 			} else {
-				markNotFound(item);
+				item.markNotFound();
 				logger.log("API_RES", String.format("ID %d | No results returned from Crossref.", item.getId()));
 				return false;
 			}
 
 		} catch (Exception e) {
-			markNotFound(item);
+			item.markNotFound();
 			logger.log("ERROR", "Crossref API Request failed for ID " + item.getId() + ": " + e.getMessage());
 			return false;
 		}
 	}
 
 	private String callApi(String url) throws Exception {
+		
 		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url))
-				.header("User-Agent", "Cerca/1.0 (mailto:cerca.app@gmail.com)").GET().build();
+				.header("User-Agent", "Cerca/1.0 (mailto:" + email + ")").GET().build();
 		HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 		if (response.statusCode() == 200)
 			return response.body();
@@ -95,7 +97,7 @@ public class CrossrefService {
             message = root.getAsJsonObject("message");
         } else {
             var items = root.getAsJsonObject("message").getAsJsonArray("items");
-            if (items.size() == 0) { markNotFound(item); return; }
+            if (items.size() == 0) { item.markNotFound(); return; }
             message = items.get(0).getAsJsonObject();
         }
 
@@ -185,9 +187,19 @@ public class CrossrefService {
 	    return clean.trim().replace(" ", "+");
 	}
 
-	private void markNotFound(ReferenceItem item) {
-		item.statusProperty().set("❌ NOT FOUND");
-		item.statusColorProperty().set(Color.RED);
-		item.matchScoreProperty().set(0);
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
 	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	
 }

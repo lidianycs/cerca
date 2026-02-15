@@ -1,19 +1,24 @@
 package com.cerca.controller;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import com.cerca.model.ReferenceItem;
 import com.cerca.service.CermineService;
+import com.cerca.service.ConfigService;
 import com.cerca.service.CrossrefService;
 import com.cerca.service.CsvService;
 import com.cerca.service.LogService;
 import com.cerca.service.OpenAlexService;
 import com.cerca.service.ReportService;
+import com.cerca.service.SemanticScholarService;
 import com.cerca.service.ZenodoService;
 import com.cerca.utils.ReferenceParser;
 import com.cerca.view.MainView;
@@ -22,8 +27,15 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.TransferMode;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import pl.edu.icm.cermine.exception.AnalysisException;
 
@@ -32,6 +44,7 @@ import pl.edu.icm.cermine.exception.AnalysisException;
  *
  * This controller manages user interactions such as loading PDF files,
  * initiating reference verification, and displaying results.
+ * 
  * @author Lidiany Cerqueira
  * 
  */
@@ -45,8 +58,10 @@ public class MainController {
 	private final ReportService reportService;
 	private final LogService logService;
 	private final ZenodoService zenodoService;
+	private final SemanticScholarService semScholarService;
 
 	private final OpenAlexService openAlexService;
+	private final ConfigService configService;
 
 	public MainController(MainView view) {
 		this.view = view;
@@ -58,6 +73,12 @@ public class MainController {
 		this.crossrefService = new CrossrefService(logService);
 		this.zenodoService = new ZenodoService(logService);
 		this.openAlexService = new OpenAlexService(logService);
+		
+		this.semScholarService = new SemanticScholarService(logService);		
+		this.configService = new ConfigService(logService);
+		this.semScholarService.setApiKey(configService.getProperty("SEMANTIC_SCHOLAR_API_KEY"));
+		this.crossrefService.setEmail(configService.getProperty("USER_EMAIL"));
+		this.openAlexService.setEmail(configService.getProperty("USER_EMAIL"));
 		view.getTable().setItems(data);
 
 		setupDragAndDrop();
@@ -81,8 +102,8 @@ public class MainController {
 			event.setDropCompleted(true);
 			event.consume();
 		});
-	}	
-	
+	}
+
 	private void openUrl(String url) {
 		try {
 			java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
@@ -116,7 +137,7 @@ public class MainController {
 			try {
 				return cermineService.extractReferences(file);
 			} catch (Exception e) {
-				
+
 				throw new CompletionException(e);
 			}
 		}).thenAccept(items -> {
@@ -182,13 +203,13 @@ public class MainController {
 
 	private void setupButtons() {
 		view.getPasteButton().setOnAction(e -> {
-		    view.showManualEntryDialog(pastedText -> {
-		        if (pastedText != null && !pastedText.isEmpty()) {
-		        	loadManualReferences(pastedText);
-		        }
-		    });
+			view.showManualEntryDialog(pastedText -> {
+				if (pastedText != null && !pastedText.isEmpty()) {
+					loadManualReferences(pastedText);
+				}
+			});
 		});
-		
+
 		view.getVerifyButton().setOnAction(e -> verifyAll());
 
 		view.getSaveButton().setOnAction(e -> exportData());
@@ -198,6 +219,9 @@ public class MainController {
 
 		view.getSponsorItem().setOnAction(e -> openUrl("https://github.com/lidianycs/cerca"));
 		view.getContributeItem().setOnAction(e -> openUrl("https://github.com/lidianycs/cerca"));
+
+		view.getPreferencesItem().setOnAction(e -> openSettingsDialog());
+		view.getEmailItem().setOnAction(e -> openEmailDialog());
 	}
 
 	private void showAboutDialog() {
@@ -277,35 +301,44 @@ public class MainController {
 					item.statusProperty().set("SEARCHING...");
 				});
 
-				crossrefService.verifyItem(item);
 				
-				// Define what score counts as a "Pass" (e.g., 75%)
-				int PASS_THRESHOLD = 75;
+					crossrefService.verifyItem(item);
 
-				// Try OpenAlex 
-				if (item.getMatchScore() < PASS_THRESHOLD) {
-				    openAlexService.verify(item);
-				}
+					// Define what score counts as a "Pass" (e.g., 75%)
+					int PASS_THRESHOLD = 75;
 
-				
-				if (item.getMatchScore() < PASS_THRESHOLD) {
-				    zenodoService.verify(item);
-				}
-
-				Platform.runLater(() -> {
-
-					if (item.getMatchScore() >= 75) {
-						item.setVerified(true);
-					} else {
-						item.setVerified(false);
+					if (item.getMatchScore() < PASS_THRESHOLD) {
+						// Try OpenAlex
+						openAlexService.verify(item);
 					}
-				});
 
-				try {
-					Thread.sleep(150);
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
+					
+
+					// try zenodo
+					if (item.getMatchScore() < PASS_THRESHOLD && item.getRawText().toLowerCase().contains("zenodo")) {
+						zenodoService.verify(item);
+					}
+
+					if (item.getMatchScore() < PASS_THRESHOLD) {
+						
+						semScholarService.verify(item);
+					}
+
+					Platform.runLater(() -> {
+
+						if (item.getMatchScore() >= 75) {
+							item.setVerified(true);
+						} else {
+							item.setVerified(false);
+						}
+					});
+
+					try {
+						Thread.sleep(150);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
+				
 			}
 		}).thenRun(() -> Platform.runLater(() -> {
 
@@ -368,40 +401,155 @@ public class MainController {
 			}
 		}
 	}
-	
-		
+
 	private void loadManualReferences(String text) {
+
+		this.data.clear();
+		this.view.resetDashboard();
+
+		String[] lines = text.split("\\r?\\n");
+
+		int idCounter = 1;
+		for (String line : lines) {
+			// Skip empty lines
+			if (line.trim().length() < 5)
+				continue;
+
+			ReferenceParser.ParsedData parsedData = ReferenceParser.parse(line);
+
+			ReferenceItem item = new ReferenceItem(idCounter++, "WAITING", parsedData.authors, parsedData.title, line,
+					"");
+
+			data.add(item);
+		}
+
+		this.view.getFileTitleLabel().setText("Source: Manual Entry");
+		this.view.getStatusLabel().setText("Loaded " + data.size() + " references. Ready to verify.");
+	}
+
+	public void openSettingsDialog() {
+		String currentKey = this.semScholarService.getApiKey();
+
+	
+		Dialog<String> dialog = new Dialog<>();
+		dialog.setTitle("CERCA Settings");
+		dialog.setHeaderText("Semantic Scholar API Integration");
+
+		// Add standard Save and Cancel buttons
+		ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+		
+		VBox vbox = new VBox();
+		vbox.setSpacing(10);
+		vbox.setStyle("-fx-padding: 10px;");
+
+		Label instructions = new Label("Adding an API key significantly increases your search speed and rate limits.");
+		instructions.setWrapText(true);
+
+		// Clickable link to the Semantic Scholar registration form
+		Hyperlink link = new Hyperlink("Get your free Semantic Scholar API key here");
+		link.setOnAction(e -> {
+			try {
+				if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+					Desktop.getDesktop().browse(new URI("https://www.semanticscholar.org/product/api#api-key-form"));
+				} else {
+					logService.log("ERROR", "Desktop browsing is not supported on this system.");
+				}
+			} catch (Exception ex) {
+				logService.log("ERROR", "Failed to open browser: " + ex.getMessage());
+			}
+		});
+
+		TextField keyInput = new TextField();
+		keyInput.setPromptText("Paste your API Key here...");
+		keyInput.setText(currentKey);
+		keyInput.setPrefWidth(350);
+
+		// Privacy disclaimer
+		Label privacyNote = new Label(
+				"🔒 Privacy Note: Your API key is stored locally on your machine.\nIt is never uploaded, distributed, or tracked by CERCA.");
+		privacyNote.setStyle("-fx-text-fill: #555555; -fx-font-size: 12px;");
+		privacyNote.setWrapText(true);
+
+	
+		vbox.getChildren().addAll(instructions, link, keyInput, privacyNote);
+		dialog.getDialogPane().setContent(vbox);
+
+		
+		Platform.runLater(keyInput::requestFocus);
+
+		//  Convert the result when the user clicks "Save"
+		dialog.setResultConverter(dialogButton -> {
+			if (dialogButton == saveButtonType) {
+				return keyInput.getText();
+			}
+			return null;
+		});
+
+		// Show the dialog and handle the result
+		Optional<String> result = dialog.showAndWait();
+
+		result.ifPresent(newKey -> {
+			configService.setProperty("SEMANTIC_SCHOLAR_API_KEY", newKey);
+			this.semScholarService.setApiKey(newKey);
+		    logService.log("INFO", "API Key updated successfully!");
+		});
+	}
+	
+	public void openEmailDialog() {
+	    // 1. Fetch current email from ConfigService
+	    String currentEmail = configService.getProperty("USER_EMAIL");
+
 	   
-	    this.data.clear(); 
-	    this.view.resetDashboard();
-	    
-	    
-	    String[] lines = text.split("\\r?\\n");
-	    
-	    int idCounter = 1;
-	    for (String line : lines) {
-	        // Skip empty lines
-	        if (line.trim().length() < 5) continue;
+	    Dialog<String> dialog = new Dialog<>();
+	    dialog.setTitle("CERCA Settings");
+	    dialog.setHeaderText("Polite Pool Email");
 
-	        
-	        ReferenceParser.ParsedData parsedData = ReferenceParser.parse(line);
+	    
+	    ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+	    dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-	        
-	        ReferenceItem item = new ReferenceItem(
-	            idCounter++,       
-	            "WAITING",          
-	            parsedData.authors,       
-	            parsedData.title,         
-	            line,               
-	            ""                  
-	        );
-	        
-	        data.add(item);
-	    }
 	    
+	    VBox vbox = new VBox();
+	    vbox.setSpacing(10);
+	    vbox.setStyle("-fx-padding: 10px;");
+
+	    Label instructions = new Label("Providing your email routes your requests faster.");
+	    instructions.setWrapText(true);
+
+	    TextField emailInput = new TextField();
+	    emailInput.setPromptText("e.g., researcher@university.edu");
+	    emailInput.setText(currentEmail);
+	    emailInput.setPrefWidth(350);
+
 	    
-	    this.view.getFileTitleLabel().setText("Source: Manual Entry");
-	    this.view.getStatusLabel().setText("Loaded " + data.size() + " references. Ready to verify.");
+	    Label privacyNote = new Label("🔒 Privacy Note: Your email is stored locally and only sent to Crossref/OpenAlex for API courtesy. CERCA does not track it.");
+	    privacyNote.setStyle("-fx-text-fill: #555555; -fx-font-size: 12px;");
+	    privacyNote.setWrapText(true);
+
+	   
+	    vbox.getChildren().addAll(instructions, emailInput, privacyNote);
+	    dialog.getDialogPane().setContent(vbox);
+
+	   
+	    Platform.runLater(emailInput::requestFocus);
+
+	    // Convert the result when the user clicks "Save"
+	    dialog.setResultConverter(dialogButton -> {
+	        if (dialogButton == saveButtonType) {
+	            return emailInput.getText();
+	        }
+	        return null;
+	    });
+
+	    //  Show the dialog and capture the result
+	    Optional<String> result = dialog.showAndWait();
+
+	    result.ifPresent(newEmail -> {
+	        configService.setProperty("USER_EMAIL", newEmail);
+	        logService.log("SYSTEM", "User Email updated successfully!");
+	    });
 	}
 
 }

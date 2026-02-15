@@ -4,6 +4,9 @@
 # Log files
 *.log
 
+#Properties file
+*.properties
+
 # IDE specific files
 *.ctxt
 .DS_Store

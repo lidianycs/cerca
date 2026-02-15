@@ -62,6 +62,7 @@ public class MainView {
 	private final MenuItem sponsorItem;
 	private final MenuItem contributeItem;
 	private final MenuItem licenseItem;
+	private final MenuItem emailItem;
 	private VBox resultsDashboard;
 	private Label totalBadge;
 	private Label passedBadge;
@@ -78,6 +79,7 @@ public class MainView {
 	}
 
 	private final Label fileTitleLabel;
+	private MenuItem preferencesItem;
 
 	public Label getFileTitleLabel() {
 		return fileTitleLabel;
@@ -159,8 +161,16 @@ public class MainView {
 		licenseItem = new MenuItem("🗐 License");
 
 		helpMenu.getItems().addAll(sponsorItem, contributeItem, licenseItem, new SeparatorMenuItem(), aboutItem);
+		
+		Menu settingsMenu = new Menu("Settings");
+		setPreferencesItem(new MenuItem("⚙ API Key..."));
+		emailItem = (new MenuItem("📧 Email...")); 
+		
+		
+		// Add the item to the menu
+		settingsMenu.getItems().addAll(getPreferencesItem(), emailItem);
 
-		menuBar.getMenus().add(helpMenu);
+		menuBar.getMenus().addAll(settingsMenu, helpMenu);
 
 		VBox combinedTop = new VBox(menuBar, topWrapper);
 
@@ -561,5 +571,28 @@ public class MainView {
 			}
 		});
 	}
+
+	/**
+	 * @return the preferencesItem
+	 */
+	public MenuItem getPreferencesItem() {
+		return preferencesItem;
+	}
+
+	/**
+	 * @param preferencesItem the preferencesItem to set
+	 */
+	public void setPreferencesItem(MenuItem preferencesItem) {
+		this.preferencesItem = preferencesItem;
+	}
+
+	/**
+	 * @return the emailItem
+	 */
+	public MenuItem getEmailItem() {
+		return emailItem;
+	}
+	
+	
 
 }
