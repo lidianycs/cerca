@@ -1,5 +1,27 @@
 # CERCA – Citation Extraction & Reference Checking Assistant
 
+<p align="center">
+  <a href="https://github.com/lidianycs/cerca/releases">
+    <img alt="GitHub release" src="https://img.shields.io/github/v/release/lidianycs/cerca?color=blue&style=flat-square">
+  </a>
+  <a href="https://github.com/lidianycs/cerca/blob/main/LICENSE">
+    <img alt="License" src="https://img.shields.io/github/license/lidianycs/cerca?style=flat-square">
+  </a>
+
+  <img alt="Java Support" src="https://img.shields.io/badge/Java-17+-orange?style=flat-square&logo=java">
+  <img alt="JavaFX" src="https://img.shields.io/badge/JavaFX-UI-blue?style=flat-square">
+
+  <a href="https://sourceforge.net/projects/cerca/">
+    <img alt="SourceForge Downloads" src="https://img.shields.io/sourceforge/dt/cerca?style=flat-square&color=brightgreen">
+  </a>
+  <a href="https://github.com/lidianycs/cerca/issues">
+    <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square">
+  </a>
+  <a href="https://github.com/lidianycs/cerca/stargazers">
+    <img alt="GitHub stars" src="https://img.shields.io/github/stars/lidianycs/cerca?style=social">
+  </a>
+</p>
+
 **CERCA** is an open-source research tool that supports **verification of bibliographic references** in scientific manuscripts. It extracts references from PDF files and checks their existence and consistency against authoritative metadata sources, producing **explainable diagnostics, audit logs, and reproducible reports**.
 
 ![Cerca Dashboard Screenshot](docs/screenshot-cerca.png)
@@ -79,6 +101,7 @@ CERCA is designed with researcher privacy in mind.
    - **Crossref**
    - **Zenodo**
    - **OpenAlex**
+   - **SemanticScholar**
 3. Metadata fields (title, authors, DOI) are compared
 4. CERCA assigns:
    - A **match score**
@@ -157,6 +180,16 @@ International Journal on Document Analysis and Recognition, 2015,
 Vol. 18, No. 4, pp. 317–335, DOI: 10.1007/s10032-015-0249-8
 
 ---
+
+## 💻 Contributing
+
+CERCA is an open-source initiative, and contributions are welcomed.
+
+### How You Can Help
+
+* **🐛 Report Bugs:** If you encounter a bug, please [open an issue](https://github.com/lidianycs/cerca/issues). Describe what happened, and what you expected to happen so it can be easily reproduced.
+* **💡 Suggest Features:** Have an idea to improve the tool? Open an issue to start a discussion!
+* **🔧 Development:** We gladly welcome Pull Requests (PRs) for new features and bug fixes.
 
 ## Citation
 
