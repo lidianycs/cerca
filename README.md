@@ -24,6 +24,8 @@
 
 **CERCA** is an open-source research tool that supports **verification of bibliographic references** in scientific manuscripts. It extracts references from PDF files and checks their existence and consistency against authoritative metadata sources, producing **explainable diagnostics, audit logs, and reproducible reports**.
 
+[![Download CERCA](https://a.fsdn.com/con/app/sf-download-button)](https://sourceforge.net/projects/cerca/)
+
 ![Cerca Dashboard Screenshot](docs/screenshot-cerca.png)
 
 ---
