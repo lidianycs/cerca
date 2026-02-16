@@ -73,8 +73,8 @@ public class MainController {
 		this.crossrefService = new CrossrefService(logService);
 		this.zenodoService = new ZenodoService(logService);
 		this.openAlexService = new OpenAlexService(logService);
-		
-		this.semScholarService = new SemanticScholarService(logService);		
+
+		this.semScholarService = new SemanticScholarService(logService);
 		this.configService = new ConfigService(logService);
 		this.semScholarService.setApiKey(configService.getProperty("SEMANTIC_SCHOLAR_API_KEY"));
 		this.crossrefService.setEmail(configService.getProperty("USER_EMAIL"));
@@ -215,19 +215,22 @@ public class MainController {
 		view.getSaveButton().setOnAction(e -> exportData());
 
 		view.getAboutItem().setOnAction(e -> showAboutDialog());
+
 		view.getLicenseItem().setOnAction(e -> showLicenseDialog());
 
-		view.getSponsorItem().setOnAction(e -> openUrl("https://github.com/lidianycs/cerca"));
-		view.getContributeItem().setOnAction(e -> openUrl("https://github.com/lidianycs/cerca"));
+		view.getSponsorItem().setOnAction(e -> openSponsorDialog());
+
+		view.getContributeItem().setOnAction(e -> openContributeDialog());
 
 		view.getPreferencesItem().setOnAction(e -> openSettingsDialog());
+
 		view.getEmailItem().setOnAction(e -> openEmailDialog());
 	}
 
 	private void showAboutDialog() {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("About Cerca");
-		alert.setHeaderText("Cerca - Citation Extraction & Reference Checking Assistant vbeta");
+		alert.setHeaderText("Cerca - Citation Extraction & Reference Checking Assistant v1.3.0-alpha");
 		alert.setContentText(
 
 				"\n ✦ CERCA is an experimental tool intended to help verify bibliographic "
@@ -301,44 +304,41 @@ public class MainController {
 					item.statusProperty().set("SEARCHING...");
 				});
 
-				
-					crossrefService.verifyItem(item);
+				crossrefService.verifyItem(item);
 
-					// Define what score counts as a "Pass" (e.g., 75%)
-					int PASS_THRESHOLD = 75;
+				// Define what score counts as a "Pass" (e.g., 75%)
+				int PASS_THRESHOLD = 75;
 
-					if (item.getMatchScore() < PASS_THRESHOLD) {
-						// Try OpenAlex
-						openAlexService.verify(item);
+				if (item.getMatchScore() < PASS_THRESHOLD) {
+					// Try OpenAlex
+					openAlexService.verify(item);
+				}
+
+				// try zenodo
+				if (item.getMatchScore() < PASS_THRESHOLD && item.getRawText().toLowerCase().contains("zenodo")) {
+					zenodoService.verify(item);
+				}
+
+				if (item.getMatchScore() < PASS_THRESHOLD) {
+
+					semScholarService.verify(item);
+				}
+
+				Platform.runLater(() -> {
+
+					if (item.getMatchScore() >= 75) {
+						item.setVerified(true);
+					} else {
+						item.setVerified(false);
 					}
+				});
 
-					
+				try {
+					Thread.sleep(150);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
 
-					// try zenodo
-					if (item.getMatchScore() < PASS_THRESHOLD && item.getRawText().toLowerCase().contains("zenodo")) {
-						zenodoService.verify(item);
-					}
-
-					if (item.getMatchScore() < PASS_THRESHOLD) {
-						
-						semScholarService.verify(item);
-					}
-
-					Platform.runLater(() -> {
-
-						if (item.getMatchScore() >= 75) {
-							item.setVerified(true);
-						} else {
-							item.setVerified(false);
-						}
-					});
-
-					try {
-						Thread.sleep(150);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
-				
 			}
 		}).thenRun(() -> Platform.runLater(() -> {
 
@@ -430,16 +430,13 @@ public class MainController {
 	public void openSettingsDialog() {
 		String currentKey = this.semScholarService.getApiKey();
 
-	
 		Dialog<String> dialog = new Dialog<>();
 		dialog.setTitle("CERCA Settings");
 		dialog.setHeaderText("Semantic Scholar API Integration");
-
 		// Add standard Save and Cancel buttons
 		ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
 		dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-		
 		VBox vbox = new VBox();
 		vbox.setSpacing(10);
 		vbox.setStyle("-fx-padding: 10px;");
@@ -472,14 +469,12 @@ public class MainController {
 		privacyNote.setStyle("-fx-text-fill: #555555; -fx-font-size: 12px;");
 		privacyNote.setWrapText(true);
 
-	
 		vbox.getChildren().addAll(instructions, link, keyInput, privacyNote);
 		dialog.getDialogPane().setContent(vbox);
 
-		
 		Platform.runLater(keyInput::requestFocus);
 
-		//  Convert the result when the user clicks "Save"
+		// Convert the result when the user clicks "Save"
 		dialog.setResultConverter(dialogButton -> {
 			if (dialogButton == saveButtonType) {
 				return keyInput.getText();
@@ -493,63 +488,142 @@ public class MainController {
 		result.ifPresent(newKey -> {
 			configService.setProperty("SEMANTIC_SCHOLAR_API_KEY", newKey);
 			this.semScholarService.setApiKey(newKey);
-		    logService.log("INFO", "API Key updated successfully!");
+			logService.log("INFO", "API Key updated successfully!");
 		});
 	}
-	
+
 	public void openEmailDialog() {
-	    // 1. Fetch current email from ConfigService
-	    String currentEmail = configService.getProperty("USER_EMAIL");
+		// 1. Fetch current email from ConfigService
+		String currentEmail = configService.getProperty("USER_EMAIL");
 
-	   
-	    Dialog<String> dialog = new Dialog<>();
-	    dialog.setTitle("CERCA Settings");
-	    dialog.setHeaderText("Polite Pool Email");
+		Dialog<String> dialog = new Dialog<>();
+		dialog.setTitle("CERCA Settings");
+		dialog.setHeaderText("Polite Pool Email");
 
-	    
-	    ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-	    dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+		ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
 
-	    
-	    VBox vbox = new VBox();
-	    vbox.setSpacing(10);
-	    vbox.setStyle("-fx-padding: 10px;");
+		VBox vbox = new VBox();
+		vbox.setSpacing(10);
+		vbox.setStyle("-fx-padding: 10px;");
 
-	    Label instructions = new Label("Providing your email routes your requests faster.");
-	    instructions.setWrapText(true);
+		Label instructions = new Label("Providing your email routes your requests faster.");
+		instructions.setWrapText(true);
 
-	    TextField emailInput = new TextField();
-	    emailInput.setPromptText("e.g., researcher@university.edu");
-	    emailInput.setText(currentEmail);
-	    emailInput.setPrefWidth(350);
+		TextField emailInput = new TextField();
+		emailInput.setPromptText("e.g., researcher@university.edu");
+		emailInput.setText(currentEmail);
+		emailInput.setPrefWidth(350);
 
-	    
-	    Label privacyNote = new Label("🔒 Privacy Note: Your email is stored locally and only sent to Crossref/OpenAlex for API courtesy. CERCA does not track it.");
-	    privacyNote.setStyle("-fx-text-fill: #555555; -fx-font-size: 12px;");
-	    privacyNote.setWrapText(true);
+		Label privacyNote = new Label(
+				"🔒 Privacy Note: Your email is stored locally and only sent to Crossref/OpenAlex for API courtesy. CERCA does not track it.");
+		privacyNote.setStyle("-fx-text-fill: #555555; -fx-font-size: 12px;");
+		privacyNote.setWrapText(true);
 
-	   
-	    vbox.getChildren().addAll(instructions, emailInput, privacyNote);
-	    dialog.getDialogPane().setContent(vbox);
+		vbox.getChildren().addAll(instructions, emailInput, privacyNote);
+		dialog.getDialogPane().setContent(vbox);
 
-	   
-	    Platform.runLater(emailInput::requestFocus);
+		Platform.runLater(emailInput::requestFocus);
 
-	    // Convert the result when the user clicks "Save"
-	    dialog.setResultConverter(dialogButton -> {
-	        if (dialogButton == saveButtonType) {
-	            return emailInput.getText();
-	        }
-	        return null;
-	    });
+		// Convert the result when the user clicks "Save"
+		dialog.setResultConverter(dialogButton -> {
+			if (dialogButton == saveButtonType) {
+				return emailInput.getText();
+			}
+			return null;
+		});
 
-	    //  Show the dialog and capture the result
-	    Optional<String> result = dialog.showAndWait();
+		// Show the dialog and capture the result
+		Optional<String> result = dialog.showAndWait();
 
-	    result.ifPresent(newEmail -> {
-	        configService.setProperty("USER_EMAIL", newEmail);
-	        logService.log("SYSTEM", "User Email updated successfully!");
-	    });
+		result.ifPresent(newEmail -> {
+			configService.setProperty("USER_EMAIL", newEmail);
+			logService.log("SYSTEM", "User Email updated successfully!");
+		});
+	}
+
+	public void openSponsorDialog() {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Support CERCA");
+		alert.setHeaderText("❤ Support the Project");
+
+		alert.setContentText(null);
+
+		VBox vbox = new VBox();
+		vbox.setSpacing(12);
+		vbox.setStyle("-fx-padding: 10px; -fx-font-size: 13px;");
+
+		Label introLabel = new Label(
+				"CERCA is free and open-source. If this tool has helped your research or editorial workflow, please consider supporting its development:");
+		introLabel.setWrapText(true);
+		introLabel.setPrefWidth(400);
+
+		// 1. GitHub Star Link
+		Hyperlink githubLink = new Hyperlink("⭐ Star the repository on GitHub");
+		githubLink.setStyle("-fx-font-weight: bold;");
+		githubLink.setOnAction(e -> {
+			openUrl("https://github.com/lidianycs/cerca");
+			githubLink.setVisited(false);
+		});
+
+		// 2. SourceForge Comment Link
+		Hyperlink sourceforgeLink = new Hyperlink("💬 Leave a review on SourceForge");
+		sourceforgeLink.setStyle("-fx-font-weight: bold;");
+		sourceforgeLink.setOnAction(e -> {
+			openUrl("https://sourceforge.net/projects/cerca/reviews/");
+			sourceforgeLink.setVisited(false);
+		});
+
+		// 3. Share Recommendation
+		Label shareLabel = new Label("📢 Share the tool with your colleagues and research group!");
+		shareLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #333333; -fx-padding: 0 0 0 4px;");
+
+		vbox.getChildren().addAll(introLabel, githubLink, sourceforgeLink, shareLabel);
+
+		alert.getDialogPane().setContent(vbox);
+
+		alert.showAndWait();
+	}
+
+	public void openContributeDialog() {
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setTitle("Contribute to CERCA");
+		alert.setHeaderText("💻 Get Involved");
+		alert.setContentText(null); // Clear default text
+
+		VBox vbox = new VBox();
+		vbox.setSpacing(12);
+		vbox.setStyle("-fx-padding: 10px; -fx-font-size: 13px;");
+
+		Label introLabel = new Label("CERCA is an open-source tool. Contributions are welcomed!");
+		introLabel.setWrapText(true);
+		introLabel.setPrefWidth(400);
+
+		// Option 1: Open an Issue
+		Label issueLabel = new Label("Found a bug or have a feature request?");
+		issueLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #333333;");
+
+		Hyperlink issueLink = new Hyperlink("🐛 Open an Issue on GitHub");
+		issueLink.setOnAction(e -> {
+			// Directs them straight to the issues tab
+			openUrl("https://github.com/lidianycs/cerca/issues");
+			issueLink.setVisited(false);
+		});
+
+		// Option 2: Write Code
+		Label codeLabel = new Label("Want to write some code?");
+		codeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #333333;");
+
+		Hyperlink codeLink = new Hyperlink("🔧 Fork the repository and submit a Pull Request");
+		codeLink.setOnAction(e -> {
+			openUrl("https://github.com/lidianycs/cerca");
+			codeLink.setVisited(false);
+		});
+
+		vbox.getChildren().addAll(introLabel, issueLabel, issueLink, codeLabel, codeLink);
+		alert.getDialogPane().setContent(vbox);
+
+		alert.showAndWait();
 	}
 
 }
