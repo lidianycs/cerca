@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReferenceParserTest {
     @ParameterizedTest
@@ -46,6 +46,16 @@ public class ReferenceParserTest {
                         "[20] B. Yetiştiren, I. Özsoy, M. Ayerdem, and E. Tüzün, “Evaluating the code quality of ai-assisted code generation tools: An empirical study on github copilot, amazon codewhisperer, and chatgpt,” arXiv preprint arXiv:2304.10778, 2023. [Online]. Available: https://arxiv.org/abs/2304.10778",
                         "Yetiştiren, B., Özsoy, I., Ayerdem, M., Tüzün, E.",
                         "Evaluating the code quality of ai-assisted code generation tools: An empirical study on github copilot, amazon codewhisperer, and chatgpt"
+                ),
+                Arguments.of(
+                        "[39] Charity Majors, Liz Fong-Jones, and George Miranda. Observability engineering. \" O’Reilly Media, Inc.\", 2022.",
+                        "Majors, Charity, Fong-Jones Liz, Miranda, George",
+                        "Observability engineering"
+                ),
+                Arguments.of(
+                        "[27] R. Cavalcante, L. Oliveira, and A. Santos, “Developers’ perceptions of ai programming assistants: A case study of copilot, chatgpt, and gemini,” in Proceedings of the 2025 International Conference on Software Maintenance and Evolution (ICSME). IEEE, 2025.",
+                        "Cavalcante, R., Oliveira, L., Santos, A.",
+                        "Developers’ perceptions of ai programming assistants: A case study of copilot, chatgpt, and gemini"
                 )
         );
     }
