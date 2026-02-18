@@ -22,6 +22,8 @@
 			<groupId>pl.edu.icm</groupId>
 			<artifactId>cermine</artifactId>
 			<version>1.13</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/cermine.jar</systemPath>
 		</dependency> 
 		
 		<dependency>
