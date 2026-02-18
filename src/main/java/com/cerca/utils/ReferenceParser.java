@@ -8,14 +8,14 @@ import pl.edu.icm.cermine.bibref.model.BibEntry;
 import pl.edu.icm.cermine.bibref.model.BibEntryFieldType;
 import pl.edu.icm.cermine.exception.AnalysisException;
 
+import java.util.List;
+
 public class ReferenceParser {
 
-   
     private static CRFBibReferenceParser parser;
 
     static {
         try {
-            
             parser = CRFBibReferenceParser.getInstance();
         } catch (AnalysisException e) {
             System.err.println("CERMINE Model Error: " + e.getMessage());
@@ -46,14 +46,13 @@ public class ReferenceParser {
                 BibEntry bibEntry = parser.parseBibReference(cleanRef);
                 
                 // --- FIX: USE getAllFieldValues ---
-                java.util.List<String> authorList = bibEntry.getAllFieldValues(BibEntryFieldType.AUTHOR);
+                List<String> authorList = bibEntry.getAllFieldValues(BibEntryFieldType.AUTHOR);
                 
                 if (authorList != null && !authorList.isEmpty()) {
                     authors = String.join(", ", authorList);
                 }
 
                 title = bibEntry.getFirstFieldValue(BibEntryFieldType.TITLE);
-                
             } catch (Exception e) {
                 // Ignore, proceed to fallback
             }
@@ -64,7 +63,7 @@ public class ReferenceParser {
             title = cleanRef;
         }
 
-        return new ParsedData(clean(authors), clean(title));
+        return new ParsedData(authors, clean(title));
     }
 
     
