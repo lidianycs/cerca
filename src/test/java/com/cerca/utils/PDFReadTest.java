@@ -1,4 +1,4 @@
-package test;
+package com.cerca.utils;
 
 import com.cerca.service.CermineService;
 import org.junit.jupiter.api.Assertions;
