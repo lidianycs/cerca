@@ -23,3 +23,5 @@ target/
 
 # PDF files 
 *.pdf
+!src/test/resources/**/*.pdf
+!src/test/resources/*.txt
