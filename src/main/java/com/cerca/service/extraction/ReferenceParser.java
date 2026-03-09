@@ -1,7 +1,7 @@
 /**
  * @author Lidiany Cerqueira
  */
-package com.cerca.utils;
+package com.cerca.service.extraction;
 
 import pl.edu.icm.cermine.bibref.CRFBibReferenceParser;
 import pl.edu.icm.cermine.bibref.model.BibEntry;
@@ -12,14 +12,14 @@ import java.util.List;
 
 public class ReferenceParser {
 
-    private static CRFBibReferenceParser parser;
+    private CRFBibReferenceParser parser;
 
-    static {
+    public ReferenceParser() {
         try {
-            parser = CRFBibReferenceParser.getInstance();
+            this.parser = CRFBibReferenceParser.getInstance();
         } catch (AnalysisException e) {
             System.err.println("CERMINE Model Error: " + e.getMessage());
-        }
+        };
     }
 
     public static class ParsedData {
@@ -32,7 +32,7 @@ public class ReferenceParser {
         }
     }
 
-    public static ParsedData parse(String rawReference) {
+    public ParsedData parse(String rawReference) {
         if (rawReference == null || rawReference.trim().isEmpty()) {
             return new ParsedData("Unknown", "Unknown");
         }

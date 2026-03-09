@@ -1,4 +1,4 @@
-package com.cerca.utils;
+package com.cerca.service.extraction;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -12,7 +12,8 @@ public class ReferenceParserTest {
     @ParameterizedTest
     @MethodSource("referenceProvider")
     void testAuthorExtraction(String input, String expectedAuthors) {
-        ReferenceParser.ParsedData result = ReferenceParser.parse(input);
+        ReferenceParser textParser = new ReferenceParser();
+        ReferenceParser.ParsedData result = textParser.parse(input);
 
         assertEquals(expectedAuthors, result.authors);
     }
@@ -20,7 +21,8 @@ public class ReferenceParserTest {
     @ParameterizedTest
     @MethodSource("referenceProvider")
     void testTitleExtraction(String input, String ignored, String expectedTitle) {
-        ReferenceParser.ParsedData result = ReferenceParser.parse(input);
+        ReferenceParser textParser = new ReferenceParser();
+        ReferenceParser.ParsedData result = textParser.parse(input);
 
         assertEquals(expectedTitle, result.title);
     }

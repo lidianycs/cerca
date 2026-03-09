@@ -21,7 +21,7 @@ import com.cerca.service.lookup.OpenAlexService;
 import com.cerca.service.report.ReportService;
 import com.cerca.service.lookup.SemanticScholarService;
 import com.cerca.service.lookup.ZenodoService;
-import com.cerca.utils.ReferenceParser;
+import com.cerca.service.extraction.ReferenceParser;
 import com.cerca.view.MainView;
 
 import javafx.application.Platform;
@@ -54,6 +54,7 @@ public class MainController {
 	private final MainView view;
 	private final ObservableList<ReferenceItem> data;
 	private final PdfExtractor pdfExtractor;
+	private final ReferenceParser textExtractor;
 	private final CrossrefService crossrefService;
 	private final CsvService csvService;
 	private final ReportService reportService;
@@ -68,6 +69,7 @@ public class MainController {
 		this.view = view;
 		this.data = FXCollections.observableArrayList();
 		this.pdfExtractor = new CerminePdfExtractor();
+		this.textExtractor = new ReferenceParser();
 		this.csvService = new CsvService();
 		this.reportService = new ReportService();
 		this.logService = new LogService();
@@ -416,7 +418,7 @@ public class MainController {
 			if (line.trim().length() < 5)
 				continue;
 
-			ReferenceParser.ParsedData parsedData = ReferenceParser.parse(line);
+			ReferenceParser.ParsedData parsedData = textExtractor.parse(line);
 
 			ReferenceItem item = new ReferenceItem(idCounter++, "WAITING", parsedData.authors, parsedData.title, line,
 					"");
