@@ -2,6 +2,8 @@ package com.cerca;
 
 import com.cerca.controller.MainController;
 import com.cerca.view.MainView;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -10,13 +12,13 @@ import javafx.scene.image.Image;
 public class App extends Application {
     @Override
     public void start(Stage stage) {
+        Injector injector = Guice.createInjector(new AppModule());
+
         // Initialize MVC Components
-        MainView view = new MainView();
-        new MainController(view); 
-        
+        MainView view = injector.getInstance(MainView.class);
+        injector.getInstance(MainController.class);
     
         var iconStream = getClass().getResourceAsStream("/images/app_icon.png");
-       
         
         if (iconStream != null) {
             Image icon = new Image(iconStream);

@@ -1,9 +1,12 @@
-package com.cerca.service;
+package com.cerca.service.lookup;
 
 import com.cerca.model.ReferenceItem;
+import com.cerca.service.LogService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
@@ -25,11 +28,13 @@ import java.time.Duration;
  * The results returned by this service are used for comparison and verification.
  * @author Lidiany Cerqueira
  */
+@Singleton
 public class ZenodoService {
 
     private final HttpClient client;
     private final LogService logger;
 
+    @Inject
     public ZenodoService(LogService logger) {
         this.logger = logger;
         this.client = HttpClient.newBuilder()

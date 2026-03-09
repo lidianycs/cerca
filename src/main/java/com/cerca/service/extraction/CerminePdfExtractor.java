@@ -1,4 +1,4 @@
-package com.cerca.service;
+package com.cerca.service.extraction;
 
 import com.cerca.model.ReferenceItem;
 import pl.edu.icm.cermine.ContentExtractor;
@@ -23,7 +23,7 @@ import java.util.List;
  * Privacy note: PDF files are processed locally.
  * @author Lidiany Cerqueira
  */
-public class CermineService {
+public class CerminePdfExtractor implements PdfExtractor {
 
     public List<ReferenceItem> extractReferences(File pdfFile) throws Exception {
         List<ReferenceItem> results = new ArrayList<>();

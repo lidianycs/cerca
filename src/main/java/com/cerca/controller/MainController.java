@@ -11,18 +11,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import com.cerca.model.ReferenceItem;
-import com.cerca.service.CermineService;
+import com.cerca.service.extraction.*;
 import com.cerca.service.ConfigService;
-import com.cerca.service.CrossrefService;
-import com.cerca.service.CsvService;
+import com.cerca.service.lookup.CrossrefService;
+import com.cerca.service.report.CsvService;
 import com.cerca.service.LogService;
-import com.cerca.service.OpenAlexService;
-import com.cerca.service.ReportService;
-import com.cerca.service.SemanticScholarService;
-import com.cerca.service.ZenodoService;
-import com.cerca.utils.ReferenceParser;
+import com.cerca.service.lookup.OpenAlexService;
+import com.cerca.service.report.ReportService;
+import com.cerca.service.lookup.SemanticScholarService;
+import com.cerca.service.lookup.ZenodoService;
 import com.cerca.view.MainView;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -48,11 +49,13 @@ import pl.edu.icm.cermine.exception.AnalysisException;
  * @author Lidiany Cerqueira
  * 
  */
+@Singleton
 public class MainController {
 
 	private final MainView view;
 	private final ObservableList<ReferenceItem> data;
-	private final CermineService cermineService;
+	private final PdfExtractor pdfExtractor;
+	private final TextExtractor textExtractor;
 	private final CrossrefService crossrefService;
 	private final CsvService csvService;
 	private final ReportService reportService;
@@ -63,22 +66,32 @@ public class MainController {
 	private final OpenAlexService openAlexService;
 	private final ConfigService configService;
 
-	public MainController(MainView view) {
+	@Inject
+	public MainController(MainView view,
+						  LogService logService,
+						  ConfigService configService,
+						  PdfExtractor pdfExtractor,
+						  TextExtractor textExtractor,
+						  CrossrefService crossrefService,
+						  OpenAlexService openAlexService,
+						  ZenodoService zenodoService,
+						  SemanticScholarService semScholarService,
+						  CsvService csvService,
+						  ReportService reportService) {
 		this.view = view;
 		this.data = FXCollections.observableArrayList();
-		this.cermineService = new CermineService();
-		this.csvService = new CsvService();
-		this.reportService = new ReportService();
-		this.logService = new LogService();
-		this.crossrefService = new CrossrefService(logService);
-		this.zenodoService = new ZenodoService(logService);
-		this.openAlexService = new OpenAlexService(logService);
+		this.pdfExtractor = pdfExtractor;
+		this.textExtractor = textExtractor;
+		this.csvService = csvService;
+		this.reportService = reportService;
+		this.logService = logService;
+		this.crossrefService = crossrefService;
+		this.zenodoService = zenodoService;
+		this.openAlexService = openAlexService;
 
-		this.semScholarService = new SemanticScholarService(logService);
-		this.configService = new ConfigService(logService);
-		this.semScholarService.setApiKey(configService.getProperty("SEMANTIC_SCHOLAR_API_KEY"));
-		this.crossrefService.setEmail(configService.getProperty("USER_EMAIL"));
-		this.openAlexService.setEmail(configService.getProperty("USER_EMAIL"));
+		this.semScholarService = semScholarService;
+		this.configService = configService;
+
 		view.getTable().setItems(data);
 
 		setupDragAndDrop();
@@ -135,7 +148,7 @@ public class MainController {
 
 		CompletableFuture.supplyAsync(() -> {
 			try {
-				return cermineService.extractReferences(file);
+				return pdfExtractor.extractReferences(file);
 			} catch (Exception e) {
 
 				throw new CompletionException(e);
@@ -415,9 +428,9 @@ public class MainController {
 			if (line.trim().length() < 5)
 				continue;
 
-			ReferenceParser.ParsedData parsedData = ReferenceParser.parse(line);
+			ParsedData parsedData = textExtractor.parse(line);
 
-			ReferenceItem item = new ReferenceItem(idCounter++, "WAITING", parsedData.authors, parsedData.title, line,
+			ReferenceItem item = new ReferenceItem(idCounter++, "WAITING", parsedData.authors(), parsedData.title(), line,
 					"");
 
 			data.add(item);
@@ -428,7 +441,7 @@ public class MainController {
 	}
 
 	public void openSettingsDialog() {
-		String currentKey = this.semScholarService.getApiKey();
+		String currentKey = configService.getProperty("SEMANTIC_SCHOLAR_API_KEY");
 
 		Dialog<String> dialog = new Dialog<>();
 		dialog.setTitle("CERCA Settings");
@@ -487,7 +500,6 @@ public class MainController {
 
 		result.ifPresent(newKey -> {
 			configService.setProperty("SEMANTIC_SCHOLAR_API_KEY", newKey);
-			this.semScholarService.setApiKey(newKey);
 			logService.log("INFO", "API Key updated successfully!");
 		});
 	}
