@@ -1,6 +1,5 @@
-package com.cerca.utils;
+package com.cerca.service.extraction;
 
-import com.cerca.service.CermineService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,7 +8,7 @@ import pl.edu.icm.cermine.exception.AnalysisException;
 
 import java.io.File;
 
-public class PDFReadTest {
+public class CermineServiceTest {
 
     private CermineService cermineService;
 

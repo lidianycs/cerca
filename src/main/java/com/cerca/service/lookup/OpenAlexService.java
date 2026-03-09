@@ -1,6 +1,7 @@
-package com.cerca.service;
+package com.cerca.service.lookup;
 
 import com.cerca.model.ReferenceItem;
+import com.cerca.service.LogService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,7 +20,7 @@ import java.time.Duration;
 public class OpenAlexService {
 
     private final HttpClient client;
-    private final LogService logger;   
+    private final LogService logger;
   
       
     private String email;

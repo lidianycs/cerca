@@ -1,4 +1,4 @@
-package com.cerca.service;
+package com.cerca.service.extraction;
 
 import com.cerca.model.ReferenceItem;
 import pl.edu.icm.cermine.ContentExtractor;

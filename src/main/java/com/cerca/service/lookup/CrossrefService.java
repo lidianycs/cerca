@@ -1,4 +1,4 @@
-package com.cerca.service;
+package com.cerca.service.lookup;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 import com.cerca.model.ReferenceItem;
+import com.cerca.service.LogService;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 

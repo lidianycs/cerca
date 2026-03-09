@@ -11,15 +11,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import com.cerca.model.ReferenceItem;
-import com.cerca.service.CermineService;
+import com.cerca.service.extraction.CermineService;
 import com.cerca.service.ConfigService;
-import com.cerca.service.CrossrefService;
-import com.cerca.service.CsvService;
+import com.cerca.service.lookup.CrossrefService;
+import com.cerca.service.report.CsvService;
 import com.cerca.service.LogService;
-import com.cerca.service.OpenAlexService;
-import com.cerca.service.ReportService;
-import com.cerca.service.SemanticScholarService;
-import com.cerca.service.ZenodoService;
+import com.cerca.service.lookup.OpenAlexService;
+import com.cerca.service.report.ReportService;
+import com.cerca.service.lookup.SemanticScholarService;
+import com.cerca.service.lookup.ZenodoService;
 import com.cerca.utils.ReferenceParser;
 import com.cerca.view.MainView;
 

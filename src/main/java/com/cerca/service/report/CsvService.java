@@ -1,4 +1,4 @@
-package com.cerca.service;
+package com.cerca.service.report;
 
 import com.cerca.model.ReferenceItem;
 import java.io.BufferedWriter;
