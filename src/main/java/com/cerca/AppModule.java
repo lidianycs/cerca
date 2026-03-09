@@ -1,10 +1,7 @@
 package com.cerca;
 
 import com.cerca.service.ConfigService;
-import com.cerca.service.extraction.CerminePdfExtractor;
-import com.cerca.service.extraction.CermineTextExtractor;
-import com.cerca.service.extraction.PdfExtractor;
-import com.cerca.service.extraction.TextExtractor;
+import com.cerca.service.extraction.*;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -17,7 +14,7 @@ public class AppModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(PdfExtractor.class).to(CerminePdfExtractor.class).in(Singleton.class);
-        bind(TextExtractor.class).to(CermineTextExtractor.class).in(Singleton.class);
+        bind(TextExtractor.class).to(GrobidTextExtractor.class).in(Singleton.class);
     }
 
     @Provides
