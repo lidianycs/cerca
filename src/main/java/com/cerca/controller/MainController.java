@@ -11,8 +11,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import com.cerca.model.ReferenceItem;
-import com.cerca.service.extraction.CermineService;
+import com.cerca.service.extraction.CerminePdfExtractor;
 import com.cerca.service.ConfigService;
+import com.cerca.service.extraction.PdfExtractor;
 import com.cerca.service.lookup.CrossrefService;
 import com.cerca.service.report.CsvService;
 import com.cerca.service.LogService;
@@ -52,7 +53,7 @@ public class MainController {
 
 	private final MainView view;
 	private final ObservableList<ReferenceItem> data;
-	private final CermineService cermineService;
+	private final PdfExtractor pdfExtractor;
 	private final CrossrefService crossrefService;
 	private final CsvService csvService;
 	private final ReportService reportService;
@@ -66,7 +67,7 @@ public class MainController {
 	public MainController(MainView view) {
 		this.view = view;
 		this.data = FXCollections.observableArrayList();
-		this.cermineService = new CermineService();
+		this.pdfExtractor = new CerminePdfExtractor();
 		this.csvService = new CsvService();
 		this.reportService = new ReportService();
 		this.logService = new LogService();
@@ -135,7 +136,7 @@ public class MainController {
 
 		CompletableFuture.supplyAsync(() -> {
 			try {
-				return cermineService.extractReferences(file);
+				return pdfExtractor.extractReferences(file);
 			} catch (Exception e) {
 
 				throw new CompletionException(e);

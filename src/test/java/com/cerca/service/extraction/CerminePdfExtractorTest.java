@@ -8,13 +8,13 @@ import pl.edu.icm.cermine.exception.AnalysisException;
 
 import java.io.File;
 
-public class CermineServiceTest {
+public class CerminePdfExtractorTest {
 
-    private CermineService cermineService;
+    private CerminePdfExtractor cerminePdfExtractor;
 
     @BeforeEach
     public void initialize() {
-        cermineService = new CermineService();
+        cerminePdfExtractor = new CerminePdfExtractor();
     }
 
     @Test
@@ -22,7 +22,7 @@ public class CermineServiceTest {
     public void testIEEEPDFRead() throws Exception {
         String filePath = "src/test/resources/pdfs/Dummy_PDF_IEEE_Format.pdf";
         File file = new File(filePath);
-        Assertions.assertFalse(cermineService.extractReferences(file).isEmpty());
+        Assertions.assertFalse(cerminePdfExtractor.extractReferences(file).isEmpty());
     }
 
     @Test
@@ -30,7 +30,7 @@ public class CermineServiceTest {
     public void testAPAPDFRead() throws Exception {
         String filePath = "src/test/resources/pdfs/Dummy_PDF_APA_Format.pdf";
         File file = new File(filePath);
-        Assertions.assertFalse(cermineService.extractReferences(file).isEmpty());
+        Assertions.assertFalse(cerminePdfExtractor.extractReferences(file).isEmpty());
     }
 
     @Test
@@ -38,7 +38,7 @@ public class CermineServiceTest {
     public void testWhatExceptionIsThrown(){
         File file = new File("src/test/resources/pdfs/nonExistentFile.pdf");
         Assertions.assertThrows(java.io.FileNotFoundException.class, () -> {
-            cermineService.extractReferences(file);
+            cerminePdfExtractor.extractReferences(file);
         });
     }
 
@@ -47,7 +47,7 @@ public class CermineServiceTest {
     public void testNonPDFFileThrowsException(){
         File file = new File("src/test/resources/not_a_pdf.txt");
         Assertions.assertThrows(AnalysisException.class, () -> {
-            cermineService.extractReferences(file);
+            cerminePdfExtractor.extractReferences(file);
         });
     }
 }
