@@ -8,23 +8,23 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ReferenceParserTest {
+public class CermineTextExtractorTest {
     @ParameterizedTest
     @MethodSource("referenceProvider")
     void testAuthorExtraction(String input, String expectedAuthors) {
-        ReferenceParser textParser = new ReferenceParser();
-        ReferenceParser.ParsedData result = textParser.parse(input);
+        CermineTextExtractor textParser = new CermineTextExtractor();
+        ParsedData result = textParser.parse(input);
 
-        assertEquals(expectedAuthors, result.authors);
+        assertEquals(expectedAuthors, result.authors());
     }
 
     @ParameterizedTest
     @MethodSource("referenceProvider")
     void testTitleExtraction(String input, String ignored, String expectedTitle) {
-        ReferenceParser textParser = new ReferenceParser();
-        ReferenceParser.ParsedData result = textParser.parse(input);
+        CermineTextExtractor textParser = new CermineTextExtractor();
+        ParsedData result = textParser.parse(input);
 
-        assertEquals(expectedTitle, result.title);
+        assertEquals(expectedTitle, result.title());
     }
 
     static Stream<Arguments> referenceProvider() {

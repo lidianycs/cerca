@@ -11,9 +11,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import com.cerca.model.ReferenceItem;
-import com.cerca.service.extraction.CerminePdfExtractor;
+import com.cerca.service.extraction.*;
 import com.cerca.service.ConfigService;
-import com.cerca.service.extraction.PdfExtractor;
 import com.cerca.service.lookup.CrossrefService;
 import com.cerca.service.report.CsvService;
 import com.cerca.service.LogService;
@@ -21,7 +20,6 @@ import com.cerca.service.lookup.OpenAlexService;
 import com.cerca.service.report.ReportService;
 import com.cerca.service.lookup.SemanticScholarService;
 import com.cerca.service.lookup.ZenodoService;
-import com.cerca.service.extraction.ReferenceParser;
 import com.cerca.view.MainView;
 
 import javafx.application.Platform;
@@ -54,7 +52,7 @@ public class MainController {
 	private final MainView view;
 	private final ObservableList<ReferenceItem> data;
 	private final PdfExtractor pdfExtractor;
-	private final ReferenceParser textExtractor;
+	private final TextExtractor textExtractor;
 	private final CrossrefService crossrefService;
 	private final CsvService csvService;
 	private final ReportService reportService;
@@ -69,7 +67,7 @@ public class MainController {
 		this.view = view;
 		this.data = FXCollections.observableArrayList();
 		this.pdfExtractor = new CerminePdfExtractor();
-		this.textExtractor = new ReferenceParser();
+		this.textExtractor = new CermineTextExtractor();
 		this.csvService = new CsvService();
 		this.reportService = new ReportService();
 		this.logService = new LogService();
@@ -418,9 +416,9 @@ public class MainController {
 			if (line.trim().length() < 5)
 				continue;
 
-			ReferenceParser.ParsedData parsedData = textExtractor.parse(line);
+			ParsedData parsedData = textExtractor.parse(line);
 
-			ReferenceItem item = new ReferenceItem(idCounter++, "WAITING", parsedData.authors, parsedData.title, line,
+			ReferenceItem item = new ReferenceItem(idCounter++, "WAITING", parsedData.authors(), parsedData.title(), line,
 					"");
 
 			data.add(item);

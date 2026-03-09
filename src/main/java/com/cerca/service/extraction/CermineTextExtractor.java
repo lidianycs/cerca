@@ -10,11 +10,11 @@ import pl.edu.icm.cermine.exception.AnalysisException;
 
 import java.util.List;
 
-public class ReferenceParser {
+public class CermineTextExtractor implements TextExtractor {
 
     private CRFBibReferenceParser parser;
 
-    public ReferenceParser() {
+    public CermineTextExtractor() {
         try {
             this.parser = CRFBibReferenceParser.getInstance();
         } catch (AnalysisException e) {
@@ -22,16 +22,7 @@ public class ReferenceParser {
         };
     }
 
-    public static class ParsedData {
-        public String authors;
-        public String title;
-        
-        public ParsedData(String authors, String title) {
-            this.authors = authors;
-            this.title = title;
-        }
-    }
-
+    @Override
     public ParsedData parse(String rawReference) {
         if (rawReference == null || rawReference.trim().isEmpty()) {
             return new ParsedData("Unknown", "Unknown");
