@@ -1,6 +1,8 @@
 package com.cerca.service.report;
 
 import com.cerca.model.ReferenceItem;
+import com.google.inject.Singleton;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -12,6 +14,7 @@ import java.util.List;
  *
  * @author Lidiany Cerqueira
  */
+@Singleton
 public class CsvService {
 
     public void exportToCsv(List<ReferenceItem> data, File file) throws IOException {

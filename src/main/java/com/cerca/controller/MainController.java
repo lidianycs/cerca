@@ -22,6 +22,8 @@ import com.cerca.service.lookup.SemanticScholarService;
 import com.cerca.service.lookup.ZenodoService;
 import com.cerca.view.MainView;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -47,6 +49,7 @@ import pl.edu.icm.cermine.exception.AnalysisException;
  * @author Lidiany Cerqueira
  * 
  */
+@Singleton
 public class MainController {
 
 	private final MainView view;
@@ -63,23 +66,32 @@ public class MainController {
 	private final OpenAlexService openAlexService;
 	private final ConfigService configService;
 
-	public MainController(MainView view) {
+	@Inject
+	public MainController(MainView view,
+						  LogService logService,
+						  ConfigService configService,
+						  PdfExtractor pdfExtractor,
+						  TextExtractor textExtractor,
+						  CrossrefService crossrefService,
+						  OpenAlexService openAlexService,
+						  ZenodoService zenodoService,
+						  SemanticScholarService semScholarService,
+						  CsvService csvService,
+						  ReportService reportService) {
 		this.view = view;
 		this.data = FXCollections.observableArrayList();
-		this.pdfExtractor = new CerminePdfExtractor();
-		this.textExtractor = new CermineTextExtractor();
-		this.csvService = new CsvService();
-		this.reportService = new ReportService();
-		this.logService = new LogService();
-		this.crossrefService = new CrossrefService(logService);
-		this.zenodoService = new ZenodoService(logService);
-		this.openAlexService = new OpenAlexService(logService);
+		this.pdfExtractor = pdfExtractor;
+		this.textExtractor = textExtractor;
+		this.csvService = csvService;
+		this.reportService = reportService;
+		this.logService = logService;
+		this.crossrefService = crossrefService;
+		this.zenodoService = zenodoService;
+		this.openAlexService = openAlexService;
 
-		this.semScholarService = new SemanticScholarService(logService);
-		this.configService = new ConfigService(logService);
-		this.semScholarService.setApiKey(configService.getProperty("SEMANTIC_SCHOLAR_API_KEY"));
-		this.crossrefService.setEmail(configService.getProperty("USER_EMAIL"));
-		this.openAlexService.setEmail(configService.getProperty("USER_EMAIL"));
+		this.semScholarService = semScholarService;
+		this.configService = configService;
+
 		view.getTable().setItems(data);
 
 		setupDragAndDrop();
@@ -429,7 +441,7 @@ public class MainController {
 	}
 
 	public void openSettingsDialog() {
-		String currentKey = this.semScholarService.getApiKey();
+		String currentKey = configService.getProperty("SEMANTIC_SCHOLAR_API_KEY");
 
 		Dialog<String> dialog = new Dialog<>();
 		dialog.setTitle("CERCA Settings");
@@ -488,7 +500,6 @@ public class MainController {
 
 		result.ifPresent(newKey -> {
 			configService.setProperty("SEMANTIC_SCHOLAR_API_KEY", newKey);
-			this.semScholarService.setApiKey(newKey);
 			logService.log("INFO", "API Key updated successfully!");
 		});
 	}

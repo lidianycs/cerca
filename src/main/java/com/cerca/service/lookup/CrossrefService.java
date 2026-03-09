@@ -12,6 +12,9 @@ import com.cerca.service.LogService;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import javafx.scene.paint.Color;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
 
@@ -24,16 +27,18 @@ import me.xdrop.fuzzywuzzy.FuzzySearch;
  * The results returned by this service are used for comparison and verification.
  * @author Lidiany Cerqueira
  */
+@Singleton
 public class CrossrefService {
 	
 	private final LogService logger;
 	private final HttpClient client;
-	private String email;
+	private final String email;
 
-	
-	
-	public CrossrefService(LogService logger) {
+
+	@Inject
+	public CrossrefService(LogService logger, @Named("USER_EMAIL") String email) {
         this.logger = logger;
+		this.email = email;
         this.client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
     }
 
@@ -180,27 +185,9 @@ public class CrossrefService {
 	/** Helper to safely format text for a URL**/
 	private String cleanText(String text) {
 	    if (text == null) return "";
-	    
-	    
+
 	    String clean = text.replaceAll("[^a-zA-Z0-9\\s]", "");
-	    
-	    
+
 	    return clean.trim().replace(" ", "+");
 	}
-
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
-
-	/**
-	 * @param email the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	
 }

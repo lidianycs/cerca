@@ -1,6 +1,8 @@
 package com.cerca.service.report;
 
 import com.cerca.model.ReferenceItem;
+import com.google.inject.Singleton;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +15,7 @@ import java.util.List;
  *
  * @author Lidiany Cerqueira
  */
+@Singleton
 public class ReportService {
 
     public void exportReport(List<ReferenceItem> items, File file) throws IOException {

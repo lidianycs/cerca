@@ -9,11 +9,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import com.cerca.model.ReferenceItem;
+import com.cerca.service.ConfigService;
 import com.cerca.service.LogService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import me.xdrop.fuzzywuzzy.FuzzySearch;	
@@ -23,17 +27,20 @@ import me.xdrop.fuzzywuzzy.FuzzySearch;
  * if it exists.
  * * @author Lidiany Cerqueira
  */
+@Singleton
 public class SemanticScholarService {
 
-    private final HttpClient client;
     private final LogService logger;
-    private String apiKey = ""; // Stores the API key
+    private final ConfigService configService;
+    private final HttpClient client;
 
     // Semantic Scholar API Endpoint
     private static final String API_URL = "https://api.semanticscholar.org/graph/v1/paper/search";
 
-    public SemanticScholarService(LogService logger) {
+    @Inject
+    public SemanticScholarService(LogService logger, ConfigService configService) {
         this.logger = logger;
+        this.configService = configService;
         this.client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(10))
@@ -42,8 +49,7 @@ public class SemanticScholarService {
     
 
     public boolean verify(ReferenceItem item) {
-    	
-    	if(apiKey.equals("")) {
+    	if(getApiKey().equals("")) {
     		logger.log("ERROR", "Set your SemanticScholar API key.");
     		return false;
     	}
@@ -79,8 +85,8 @@ public class SemanticScholarService {
                         .GET();
 
                 // Add the header if the key was loaded successfully
-                if (!apiKey.isEmpty()) {
-                    requestBuilder.header("x-api-key", apiKey);
+                if (!getApiKey().isEmpty()) {
+                    requestBuilder.header("x-api-key", getApiKey());
                 }
 
                 HttpRequest request = requestBuilder.build();
@@ -199,16 +205,8 @@ public class SemanticScholarService {
 	/**
 	 * @return
 	 */
-	public String getApiKey() {
-		// TODO Auto-generated method stub
-		return apiKey;
+	private String getApiKey() {
+		return configService.getProperty("SEMANTIC_SCHOLAR_API_KEY");
 	}
 
-	/**
-	 * @param newKey
-	 */
-	public void setApiKey(String newKey) {
-		this.apiKey = newKey;
-		
-	}
 }

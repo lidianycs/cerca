@@ -1,6 +1,8 @@
 package com.cerca.service;
 
-import java.io.File;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -8,12 +10,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+@Singleton
 public class ConfigService {
 
 	private static final Path CONFIG_FILE = Paths.get("config.properties");
     private final LogService logger;
     private Properties properties;
-   
+
+    @Inject
     public ConfigService(LogService logger) {
         this.logger = logger;
         this.properties = new Properties();

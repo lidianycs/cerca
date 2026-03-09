@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import com.cerca.model.ReferenceItem;
 
+import com.google.inject.Singleton;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -50,6 +51,7 @@ import javafx.scene.text.FontWeight;
  * 
  * @author Lidiany Cerqueira
  */
+@Singleton
 public class MainView {
 
 	private final BorderPane layout;

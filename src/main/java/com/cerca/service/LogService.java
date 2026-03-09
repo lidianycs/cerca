@@ -1,6 +1,8 @@
 package com.cerca.service;
 
 
+import com.google.inject.Singleton;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  *
  * @author Lidiany Cerqueira
  */
+@Singleton
 public class LogService {
 
     private static final Path LOG_FILE = Paths.get("cerca_audit.log");

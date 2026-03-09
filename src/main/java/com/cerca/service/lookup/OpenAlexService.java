@@ -5,6 +5,9 @@ import com.cerca.service.LogService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import me.xdrop.fuzzywuzzy.FuzzySearch;
@@ -17,18 +20,21 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
+@Singleton
 public class OpenAlexService {
 
     private final HttpClient client;
     private final LogService logger;
   
       
-    private String email;
+    private final String email;
     
     private static final String API_URL = "https://api.openalex.org/works";
 
-    public OpenAlexService(LogService logger) {
+    @Inject
+    public OpenAlexService(LogService logger, @Named("USER_EMAIL") String email) {
         this.logger = logger;
+        this.email = email;
         this.client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(10))
@@ -164,18 +170,4 @@ public class OpenAlexService {
         }
         return false;
     }
-
-	/**
-	 * @return the email
-	 */
-	public String getEmail() {
-		return email;
-	}
-
-	/**
-	 * @param email the email to set
-	 */
-	public void setEmail(String email) {
-		this.email = email;
-	}
 }
